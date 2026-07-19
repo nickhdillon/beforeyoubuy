@@ -1,0 +1,149 @@
+@blaze(fold: true, safe: ['name'])
+
+@props([
+    'dismissible' => null,
+    'position' => null,
+    'closable' => null,
+    'trigger' => null,
+    'variant' => null,
+    'scroll' => null,
+    'flyout' => null,
+    'name' => null,
+])
+
+@php
+// Blaze doesn't support View::share, this supplements it...
+$__livewire = $__env->shared('__livewire');
+
+if ($variant === 'flyout') {
+    $flyout = true;
+    $variant = null;
+}
+
+$closable ??= $variant === 'bare' ? false : true;
+$overflow = $scroll === 'body' && ! $flyout;
+
+if ($flyout) {
+    $classes = Flux::classes()
+        ->add(match ($variant) {
+            default => match($position) {
+                // For bottom flyout we intentionally use 100% instead of 100vw because Firefox includes scrollbar gutter in vw...
+                'bottom' => 'fixed m-0 p-8 min-w-[100%] overflow-y-auto mt-auto [--flux-flyout-translate:translateY(50px)] border-t',
+                'left' => 'fixed m-0 p-8 max-h-dvh min-h-dvh md:[:where(&)]:min-w-[25rem] overflow-y-auto mr-auto [--flux-flyout-translate:translateX(-50px)] border-e rtl:mr-0 rtl:ml-auto rtl:[--flux-flyout-translate:translateX(50px)]',
+                default => 'fixed m-0 p-8 max-h-dvh min-h-dvh md:[:where(&)]:min-w-[25rem] overflow-y-auto ml-auto [--flux-flyout-translate:translateX(50px)] border-s rtl:ml-0 rtl:mr-auto rtl:[--flux-flyout-translate:translateX(-50px)]',
+            },
+            'floating' => match($position) {
+                // For bottom flyout we intentionally use 100% instead of 100vw because Firefox includes scrollbar gutter in vw...
+                'bottom' => 'fixed m-2 p-8 min-w-[calc(100%-1rem)] overflow-y-auto mt-auto [--flux-flyout-translate:translateY(50px)]',
+                'left' => 'fixed m-2 p-8 max-h-[calc(100dvh-1rem)] min-h-[calc(100dvh-1rem)] md:[:where(&)]:min-w-[25rem] overflow-y-auto mr-auto [--flux-flyout-translate:translateX(-50px)] rtl:mr-0 rtl:ml-auto rtl:[--flux-flyout-translate:translateX(50px)]',
+                default => 'fixed m-2 p-8 max-h-[calc(100dvh-1rem)] min-h-[calc(100dvh-1rem)] md:[:where(&)]:min-w-[25rem] overflow-y-auto ml-auto [--flux-flyout-translate:translateX(50px)] rtl:ml-0 rtl:mr-auto rtl:[--flux-flyout-translate:translateX(-50px)]',
+            },
+            'bare' => '',
+        })
+        ->add(match ($variant) {
+            default => 'rounded-none border-[3px] border-zinc-950 bg-white shadow-none backdrop:bg-zinc-950/55 dark:border-zinc-950 dark:bg-zinc-800 sm:shadow-[10px_12px_0] sm:shadow-zinc-950',
+            'floating' => 'rounded-none border-[3px] border-zinc-950 bg-white shadow-none backdrop:bg-zinc-950/55 dark:border-zinc-950 dark:bg-zinc-800 sm:shadow-[10px_12px_0] sm:shadow-zinc-950',
+            'bare' => 'bg-transparent',
+        });
+} elseif ($overflow) {
+    $classes = Flux::classes('backdrop:bg-zinc-950/55');
+
+    $contentClasses = Flux::classes()
+        ->add('relative')
+        ->add(match ($variant) {
+            default => 'p-6 [:where(&)]:max-w-xl [:where(&)]:min-w-xs rounded-none border-[3px] border-zinc-950 shadow-none sm:shadow-[10px_12px_0] sm:shadow-zinc-950',
+            'bare' => '',
+        })
+        ->add(match ($variant) {
+            default => 'bg-white dark:bg-zinc-800',
+            'bare' => 'bg-transparent',
+        });
+} else {
+    $classes = Flux::classes()
+        ->add(match ($variant) {
+            default => 'p-6 [:where(&)]:max-w-xl [:where(&)]:min-w-xs rounded-none border-[3px] border-zinc-950 shadow-none backdrop:bg-zinc-950/55 sm:shadow-[10px_12px_0] sm:shadow-zinc-950',
+            'bare' => '',
+        })
+        ->add(match ($variant) {
+            default => 'bg-white dark:bg-zinc-800',
+            'bare' => 'bg-transparent',
+        });
+}
+
+// Support adding the .self modifier to the wire:model directive...
+if (($wireModel = $attributes->wire('model')) && $wireModel->directive && ! $wireModel->hasModifier('self')) {
+    unset($attributes[$wireModel->directive]);
+
+    $wireModel->directive .= '.self';
+
+    $attributes = $attributes->merge([$wireModel->directive => $wireModel->value]);
+}
+
+if ($attributes['@close'] ?? null) {
+    $attributes['wire:close'] = $attributes['@close'];
+
+    unset($attributes['@close']);
+}
+
+if ($attributes['@cancel'] ?? null) {
+    $attributes['wire:cancel'] = $attributes['@cancel'];
+
+    unset($attributes['@cancel']);
+}
+
+if ($dismissible === false) {
+    $attributes = $attributes->merge(['disable-click-outside' => '']);
+}
+
+[ $contentAttributes, $attributes ] = Flux::splitAttributes($attributes, ['autofocus', 'class', 'style']);
+[ $dialogAttributes, $attributes ] = Flux::splitAttributes($attributes, ['wire:close', 'x-on:close', 'wire:cancel', 'x-on:cancel']);
+
+if (! $overflow) {
+    $dialogAttributes = $dialogAttributes->merge($contentAttributes->getAttributes());
+}
+@endphp
+
+<ui-modal {{ $attributes }} data-flux-modal>
+    <?php if ($trigger): ?>
+        {{ $trigger }}
+    <?php endif; ?>
+
+    <dialog
+        wire:ignore.self {{-- This needs to be here because the dialog element adds a "close" attribute that isn't durable... --}}
+        {{ $dialogAttributes->class($classes) }}
+        <?php if ($name): ?> data-modal="{{ $name }}" <?php endif; ?>
+        <?php if ($flyout): ?> data-flux-flyout <?php endif; ?>
+        <?php if ($overflow): ?> data-flux-modal-overflow <?php endif; ?>
+        @unblaze(scope: ['name' => $name])
+        x-data="fluxModal(@js($scope['name']), @js(isset($__livewire) ? $__livewire->getId() : null))"
+        @endunblaze
+        x-on:modal-show.document="handleShow($event)"
+        x-on:modal-close.document="handleClose($event)"
+    >
+        <?php if ($overflow): ?>
+            <div class="flex min-h-full items-center justify-center p-4 sm:p-6">
+                <div {{ $contentAttributes->class($contentClasses) }} data-flux-modal-content>
+                    {{ $slot }}
+
+                    <?php if ($closable): ?>
+                        <div class="absolute top-0 end-0 mt-4 me-4">
+                            <flux:modal.close>
+                                <flux:button variant="ghost" icon="x-mark" size="sm" aria-label="{{ __('Close modal') }}" class="text-zinc-500! hover:text-zinc-950! dark:text-zinc-400! dark:hover:text-white!" data-flux-button-utility></flux:button>
+                            </flux:modal.close>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php else: ?>
+            {{ $slot }}
+
+            <?php if ($closable): ?>
+                <div class="absolute top-0 end-0 mt-4 me-4">
+                    <flux:modal.close>
+                        <flux:button variant="ghost" icon="x-mark" size="sm" aria-label="{{ __('Close modal') }}" class="text-zinc-500! hover:text-zinc-950! dark:text-zinc-400! dark:hover:text-white!" data-flux-button-utility></flux:button>
+                    </flux:modal.close>
+                </div>
+            <?php endif; ?>
+        <?php endif; ?>
+    </dialog>
+</ui-modal>
