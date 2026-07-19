@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" role="img" aria-label="Before You Buy logo">
+    <rect x="5" y="5" width="42" height="42" fill="#09090b"/>
+    <rect x="1" y="1" width="42" height="42" fill="#059669" stroke="#09090b" stroke-width="2"/>
+    <path d="M17 11h15v18H17z" fill="#ea580c" stroke="#09090b" stroke-width="2.5"/>
+    <path d="M11 16h16v17H11z" fill="#fff" stroke="#09090b" stroke-width="2.5"/>
+    <path d="M15 21h8M15 25h8M15 29h5" stroke="#047857" stroke-width="2.5"/>
+</svg>
