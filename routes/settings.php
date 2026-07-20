@@ -1,6 +1,5 @@
 <?php
 
-use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\Security;
 use Illuminate\Support\Facades\Route;
