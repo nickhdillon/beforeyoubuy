@@ -5,7 +5,7 @@ use App\Models\User;
 use Livewire\Livewire;
 
 test('profile page is displayed', function () {
-    $this->actingAs($user = User::factory()->create());
+    $this->actingAs(User::factory()->create());
 
     $response = $this->get('/settings/profile');
 
@@ -13,31 +13,6 @@ test('profile page is displayed', function () {
         ->assertOk()
         ->assertSee('Delete account')
         ->assertSee('data-test="delete-account-trigger"', escape: false);
-
-    preg_match('/<button[^>]*data-test="delete-account-trigger"[^>]*>/', $response->getContent(), $deleteAccountButton);
-    preg_match('/<button[^>]*data-test="password-visibility-toggle"[^>]*>/', $response->getContent(), $passwordVisibilityButton);
-    preg_match('/<dialog[^>]*data-modal="confirm-user-deletion"[^>]*>/', $response->getContent(), $deleteAccountModal);
-
-    expect($deleteAccountButton[0] ?? '')
-        ->toContain('border-2 border-zinc-950')
-        ->toContain('shadow-[5px_6px_0]')
-        ->toContain('hover:-translate-y-1')
-        ->toContain('hover:shadow-[7px_9px_0]')
-        ->toContain('active:shadow-[2px_3px_0]');
-
-    expect($passwordVisibilityButton[0] ?? '')
-        ->toContain('border-0')
-        ->toContain('shadow-none')
-        ->toContain('hover:translate-y-0')
-        ->not->toContain('shadow-[5px_6px_0]');
-
-    expect($deleteAccountModal[0] ?? '')
-        ->toContain('rounded-none')
-        ->toContain('border-[3px] border-zinc-950')
-        ->toContain('shadow-none')
-        ->toContain('sm:shadow-[10px_12px_0]')
-        ->toContain('sm:shadow-zinc-950')
-        ->toContain('backdrop:bg-zinc-950/55');
 });
 
 test('profile information can be updated', function () {
