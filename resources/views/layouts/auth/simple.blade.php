@@ -8,7 +8,7 @@
             <div class="pointer-events-none absolute -top-28 -left-24 size-80 rounded-full bg-orange-400/35 blur-3xl"></div>
             <div class="pointer-events-none absolute right-[-8rem] bottom-[-5rem] size-96 rounded-full bg-emerald-200/35 blur-3xl"></div>
 
-            <header class="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 sm:px-8 sm:py-6 lg:px-10">
+            <header class="relative z-20 mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-8 sm:py-6 lg:px-10">
                 <a href="{{ route('home') }}" class="group flex items-center gap-3 font-black tracking-[-0.04em]" wire:navigate>
                     <span class="grid size-11 place-items-center border-2 border-zinc-950 bg-emerald-600 shadow-[4px_4px_0] shadow-zinc-950 transition group-hover:-translate-y-0.5 group-hover:shadow-[5px_5px_0] sm:size-12">
                         <svg class="size-8" viewBox="0 0 32 32" fill="none" aria-hidden="true" data-brand-mark>
@@ -28,7 +28,7 @@
                 </a>
             </header>
 
-            <main class="relative z-10 flex min-h-[calc(100svh-4rem)] items-center justify-center px-4 py-5 sm:min-h-[calc(100svh-5.5rem)] sm:px-6 sm:py-14">
+            <main class="relative z-10 flex min-h-[calc(100svh-10rem)] items-center justify-center px-4 py-5 sm:min-h-[calc(100svh-5.5rem)] sm:px-6 sm:py-14">
                 <div class="w-full max-w-md border-[3px] border-zinc-950 bg-white p-5 shadow-none sm:p-8 sm:shadow-[10px_12px_0] sm:shadow-zinc-950">
                     <div class="flex flex-col gap-6">
                         {{ $slot }}

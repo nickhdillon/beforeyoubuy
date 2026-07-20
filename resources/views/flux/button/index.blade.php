@@ -64,10 +64,10 @@ if ($loading && $type !== 'submit' && ! $isJsMethod) {
 }
 
 $classes = Flux::classes()
-    ->add('relative items-center font-medium justify-center gap-2 whitespace-nowrap rounded-none transition')
+    ->add('relative items-center font-bold justify-center gap-2 whitespace-nowrap rounded-none transition')
     ->add($utility
         ? 'border-0 shadow-none hover:translate-y-0 hover:shadow-none active:translate-y-0 active:shadow-none'
-        : 'border-2 border-zinc-950 shadow-[5px_6px_0] shadow-zinc-950 hover:-translate-y-1 hover:shadow-[7px_9px_0] active:translate-y-0 active:shadow-[2px_3px_0]')
+        : 'border-2 border-zinc-950 px-3 py-2 text-white shadow-[3px_3px_0] shadow-zinc-950 transition hover:-translate-y-0.5 hover:shadow-[5px_5px_0] sm:px-5')
     ->add('disabled:opacity-75 dark:disabled:opacity-75 disabled:cursor-default disabled:pointer-events-none')
     ->add(match ($align) {
         'start' => 'justify-start',
@@ -101,6 +101,7 @@ $classes = Flux::classes()
             'orange' => 'bg-orange-600 hover:bg-orange-500',
             default => 'bg-emerald-600 hover:bg-emerald-500',
         },
+        'secondary' => 'bg-orange-600 hover:bg-orange-500',
         'filled' => 'bg-zinc-800/5 hover:bg-zinc-800/10 dark:bg-white/10 dark:hover:bg-white/20',
         'outline' => 'bg-white hover:bg-zinc-50 dark:bg-zinc-700 dark:hover:bg-zinc-600/75',
         'danger' => 'bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-500',
@@ -109,6 +110,7 @@ $classes = Flux::classes()
     })
     ->add(match ($variant) { // Text color...
         'primary' => 'font-black text-white',
+        'secondary' => 'font-black text-white',
         'filled' => 'text-zinc-800 dark:text-white',
         'outline' => 'text-zinc-800 dark:text-white',
         'danger' => 'text-white',
@@ -122,6 +124,7 @@ $classes = Flux::classes()
         'filled' => '[[data-flux-button-group]_&]:border-e [:is([data-flux-button-group]>&:last-child,_[data-flux-button-group]_:last-child>&)]:border-e-0 [[data-flux-button-group]_&]:border-zinc-200/80 dark:[[data-flux-button-group]_&]:border-zinc-900/50',
         'danger' => '[[data-flux-button-group]_&]:border-e [:is([data-flux-button-group]>&:last-child,_[data-flux-button-group]_:last-child>&)]:border-e-0 [[data-flux-button-group]_&]:border-red-600 dark:[[data-flux-button-group]_&]:border-red-900/25',
         'primary' => '[[data-flux-button-group]_&]:border-e-0 [:is([data-flux-button-group]>&:last-child,_[data-flux-button-group]_:last-child>&)]:border-e-[1px] dark:[:is([data-flux-button-group]>&:last-child,_[data-flux-button-group]_:last-child>&)]:border-e-0 dark:[:is([data-flux-button-group]>&:last-child,_[data-flux-button-group]_:last-child>&)]:border-s-[1px] [:is([data-flux-button-group]>&:not(:first-child),_[data-flux-button-group]_:not(:first-child)>&)]:border-s-[color-mix(in_srgb,var(--color-accent-foreground),transparent_85%)]',
+        'secondary' => '[[data-flux-button-group]_&]:border-e-0 [:is([data-flux-button-group]>&:last-child,_[data-flux-button-group]_:last-child>&)]:border-e-[1px] dark:[:is([data-flux-button-group]>&:last-child,_[data-flux-button-group]_:last-child>&)]:border-e-0 dark:[:is([data-flux-button-group]>&:last-child,_[data-flux-button-group]_:last-child>&)]:border-s-[1px] [:is([data-flux-button-group]>&:not(:first-child),_[data-flux-button-group]_:not(:first-child)>&)]:border-s-[color-mix(in_srgb,var(--color-accent-foreground),transparent_85%)]',
     })
     ->add($loading ? [ // Loading states...
         '*:transition-opacity',

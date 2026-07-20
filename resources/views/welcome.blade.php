@@ -21,7 +21,7 @@
 
             <header class="relative z-20 mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-5 sm:px-8 sm:py-6 lg:px-10">
                 <a href="{{ route('home') }}" class="group flex items-center gap-3" aria-label="Before You Buy home">
-                    <span class="grid size-11 place-items-center border-2 border-zinc-950 bg-emerald-600 shadow-[4px_4px_0] shadow-zinc-950 transition group-hover:-translate-y-0.5 group-hover:shadow-[5px_5px_0] sm:size-12">
+                    <span class="grid size-11 place-items-center border-2 border-zinc-950 bg-emerald-600 shadow-[3px_3px_0] shadow-zinc-950 transition group-hover:-translate-y-0.5 group-hover:shadow-[5px_5px_0] sm:size-12">
                         <svg class="size-8" viewBox="0 0 32 32" fill="none" aria-hidden="true" data-brand-mark>
                             <path d="M11 5h15v18H11z" class="fill-orange-600 stroke-zinc-950" stroke-width="2.5" />
                             <path d="M5 10h16v17H5z" class="fill-white stroke-zinc-950" stroke-width="2.5" />
@@ -37,11 +37,28 @@
                 @if (Route::has('login'))
                     <nav class="flex shrink-0 items-center gap-1 sm:gap-3" aria-label="Account navigation">
                         @auth
-                            <a href="{{ route('dashboard') }}" class="border-2 border-zinc-950 bg-white px-3 py-2 text-xs font-bold shadow-[3px_3px_0] shadow-zinc-950 transition hover:-translate-y-0.5 hover:shadow-[5px_5px_0] sm:px-5 sm:text-sm">My dashboard</a>
+                            <flux:button
+                                :href="route('dashboard')"
+                                wire:navigate
+                            >
+                                My Dashboard
+                            </flux:button>
                         @else
-                            <a href="{{ route('login') }}" class="px-2 py-2 text-xs font-bold transition hover:text-emerald-700 sm:px-4 sm:text-sm">Log in</a>
+                            <a
+                                href="{{ route('login') }}"
+                                class="px-2 py-2 text-xs font-bold transition hover:text-emerald-700 sm:px-4 sm:text-sm"
+                            >
+                                Log in
+                            </a>
+                            
                             @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="border-2 border-zinc-950 bg-orange-600 px-3 py-2 text-xs font-bold text-white shadow-[3px_3px_0] shadow-zinc-950 transition hover:-translate-y-0.5 hover:bg-orange-500 hover:shadow-[5px_5px_0] sm:px-5 sm:text-sm">Join free</a>
+                                <flux:button
+                                    variant="secondary"
+                                    :href="route('register')"
+                                    wire:navigate
+                                >
+                                    Join Free
+                                </flux:button>
                             @endif
                         @endauth
                     </nav>
@@ -51,7 +68,7 @@
             <main class="relative z-10 mx-auto grid max-w-7xl items-center gap-16 px-4 pt-8 pb-20 sm:px-8 sm:pt-16 lg:grid-cols-[1.05fr_.95fr] lg:gap-8 lg:px-10 lg:pt-20">
                 <section class="max-w-2xl">
                     <div class="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-500">
-                        <span class="inline-flex items-center gap-2 border-2 border-zinc-950 bg-orange-600 px-3 py-2 text-[11px] font-black tracking-[0.1em] text-white uppercase shadow-[3px_3px_0] shadow-zinc-950 sm:px-4 sm:text-xs sm:tracking-[0.13em]">
+                        <span class="inline-flex items-center gap-2 border-2 border-zinc-950 bg-orange-600 px-3 py-2 text-[11px] font-black font-bold tracking-[0.1em] text-white uppercase shadow-[3px_3px_0] shadow-zinc-950 sm:px-4 sm:text-xs sm:tracking-[0.13em]">
                             Your stuff, nicely sorted
                         </span>
                     </div>
@@ -71,7 +88,7 @@
                                 <span class="transition group-hover:translate-x-1" aria-hidden="true">→</span>
                             </a>
                         @elseif (Route::has('register'))
-                            <a href="{{ route('register') }}" class="group inline-flex w-full items-center justify-center gap-3 border-2 border-zinc-950 bg-emerald-600 px-6 py-3.5 font-black text-white shadow-[5px_6px_0] shadow-zinc-950 transition hover:-translate-y-1 hover:shadow-[7px_9px_0] sm:w-auto sm:px-7 sm:py-4">
+                            <a href="{{ route('register') }}" class="group inline-flex w-full items-center justify-center gap-3 border-2 border-zinc-950 bg-emerald-600 px-6 py-3.5 font-black text-white shadow-[3px_3px_0] shadow-zinc-950 transition hover:-translate-y-0.5 hover:shadow-[5px_5px_0] sm:w-auto sm:px-7 sm:py-4">
                                 Start a collection
                                 <span class="transition group-hover:translate-x-1" aria-hidden="true">→</span>
                             </a>
@@ -81,11 +98,11 @@
                 </section>
 
                 <section class="relative mx-auto w-[calc(100%-0.75rem)] max-w-xl pt-5 motion-safe:animate-in motion-safe:zoom-in-95 motion-safe:fade-in motion-safe:fill-mode-both motion-safe:delay-300 motion-safe:duration-700 sm:w-full sm:pt-0" aria-label="Owned items collection preview">
-                    <div class="border-[3px] border-zinc-950 bg-emerald-600 p-3 shadow-[8px_9px_0] shadow-zinc-950 sm:p-6 sm:shadow-[10px_12px_0]">
+                    <div class="border-[3px] border-zinc-950 bg-emerald-600 p-3 shadow-[3px_3px_0] shadow-zinc-950 sm:p-6">
                         <div class="border-2 border-zinc-950 bg-white p-4 sm:p-7">
-                            <div class="flex items-center justify-between gap-3 border-b-2 border-dashed border-emerald-200 pb-3 sm:gap-4 sm:pb-2">
+                            <div class="flex items-center justify-between gap-3 border-b-2 border-dashed border-emerald-700 pb-3 sm:gap-4 sm:pb-2">
                                 <h2 class="text-xl font-black tracking-tight sm:text-2xl">Coffee Gear</h2>
-                                <p class="mt-0.5 text-[10px] font-black tracking-wider text-emerald-700 uppercase sm:text-xs sm:tracking-widest">2 items</p>
+                                <p class="text-[10px] font-black tracking-wider text-emerald-700 uppercase sm:text-xs sm:tracking-widest">2 items</p>
                             </div>
 
                             <div class="mt-3 grid grid-cols-2 gap-2.5 sm:mt-4 sm:gap-4">
@@ -129,7 +146,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="absolute -bottom-6 -left-1 border-2 border-zinc-950 bg-orange-600 px-3 py-2 text-xs font-black text-white shadow-[4px_4px_0] shadow-zinc-950 sm:-bottom-7 sm:-left-8 sm:px-4 sm:py-3 sm:text-sm">2 items and counting</div>
+                    <div class="absolute -bottom-6 -left-1 border-2 border-zinc-950 bg-orange-600 px-3 py-2 text-xs font-black text-white shadow-[3px_3px_0] shadow-zinc-950 sm:-bottom-7 sm:-left-8 sm:px-4 sm:py-3 sm:text-sm">2 items and counting</div>
                 </section>
             </main>
 
