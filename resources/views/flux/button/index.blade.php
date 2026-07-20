@@ -64,10 +64,10 @@ if ($loading && $type !== 'submit' && ! $isJsMethod) {
 }
 
 $classes = Flux::classes()
-    ->add('relative items-center font-bold justify-center gap-2 whitespace-nowrap rounded-none transition')
+    ->add('relative items-center font-bold justify-center gap-2 whitespace-nowrap rounded-none')
     ->add($utility
-        ? 'border-0 shadow-none hover:translate-y-0 hover:shadow-none active:translate-y-0 active:shadow-none'
-        : 'border-2 border-zinc-950 px-3 py-2 text-white shadow-[3px_3px_0] shadow-zinc-950 transition hover:-translate-y-0.5 hover:shadow-[5px_5px_0] sm:px-5')
+        ? 'border-0 shadow-none transition-colors hover:translate-y-0 hover:shadow-none active:translate-y-0 active:shadow-none'
+        : 'hard-shadow hard-shadow-hover border-2 border-zinc-950 px-3 py-2 text-white hover:-translate-y-0.5 sm:px-5')
     ->add('disabled:opacity-75 dark:disabled:opacity-75 disabled:cursor-default disabled:pointer-events-none')
     ->add(match ($align) {
         'start' => 'justify-start',

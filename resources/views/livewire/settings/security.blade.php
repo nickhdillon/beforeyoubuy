@@ -1,13 +1,13 @@
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <flux:heading class="sr-only">{{ __('Security settings') }}</flux:heading>
+    <h2 class="sr-only">Security settings</h2>
 
-    <x-settings.layout :heading="__('Update password')" :subheading="__('Ensure your account is using a long, random password to stay secure')">
-        <form method="POST" wire:submit="updatePassword" class="mt-6 space-y-6">
+    <x-settings.layout current="security" heading="Update password" subheading="Use a long, unique password to keep your account secure.">
+        <form method="POST" wire:submit="updatePassword" class="space-y-6">
             <flux:input
                 wire:model="current_password"
-                :label="__('Current password')"
+                label="Current password"
                 type="password"
                 required
                 autocomplete="current-password"
@@ -15,7 +15,7 @@
             />
             <flux:input
                 wire:model="password"
-                :label="__('New password')"
+                label="New password"
                 type="password"
                 required
                 autocomplete="new-password"
@@ -24,7 +24,7 @@
             />
             <flux:input
                 wire:model="password_confirmation"
-                :label="__('Confirm password')"
+                label="Confirm new password"
                 type="password"
                 required
                 autocomplete="new-password"
@@ -33,11 +33,8 @@
             />
 
             <div class="flex items-center gap-4">
-                <flux:button variant="primary" type="submit" data-test="update-password-button">{{ __('Save') }}</flux:button>
+                <flux:button variant="primary" type="submit" data-test="update-password-button">Update password</flux:button>
             </div>
         </form>
-
-
     </x-settings.layout>
-
 </section>

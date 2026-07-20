@@ -41,17 +41,17 @@ if ($flyout) {
             'bare' => '',
         })
         ->add(match ($variant) {
-            default => 'rounded-none border-[3px] border-zinc-950 bg-white shadow-none backdrop:bg-zinc-950/55 dark:border-zinc-950 dark:bg-zinc-800 sm:shadow-[10px_12px_0] sm:shadow-zinc-950',
-            'floating' => 'rounded-none border-[3px] border-zinc-950 bg-white shadow-none backdrop:bg-zinc-950/55 dark:border-zinc-950 dark:bg-zinc-800 sm:shadow-[10px_12px_0] sm:shadow-zinc-950',
+            default => 'hard-shadow rounded-none border-[3px] border-zinc-950 bg-white backdrop:bg-zinc-950/55 backdrop:backdrop-blur-xs dark:border-zinc-950 dark:bg-zinc-800',
+            'floating' => 'hard-shadow rounded-none border-[3px] border-zinc-950 bg-white backdrop:bg-zinc-950/55 backdrop:backdrop-blur-xs dark:border-zinc-950 dark:bg-zinc-800',
             'bare' => 'bg-transparent',
         });
 } elseif ($overflow) {
-    $classes = Flux::classes('backdrop:bg-zinc-950/55');
+    $classes = Flux::classes('backdrop:bg-zinc-950/55 backdrop:backdrop-blur-xs');
 
     $contentClasses = Flux::classes()
         ->add('relative')
         ->add(match ($variant) {
-            default => 'p-6 [:where(&)]:max-w-xl [:where(&)]:min-w-xs rounded-none border-[3px] border-zinc-950 shadow-none sm:shadow-[10px_12px_0] sm:shadow-zinc-950',
+            default => 'hard-shadow w-90 p-6 sm:w-auto [:where(&)]:max-w-xl [:where(&)]:min-w-xs rounded-none border-[3px] border-zinc-950',
             'bare' => '',
         })
         ->add(match ($variant) {
@@ -61,7 +61,7 @@ if ($flyout) {
 } else {
     $classes = Flux::classes()
         ->add(match ($variant) {
-            default => 'p-6 [:where(&)]:max-w-xl [:where(&)]:min-w-xs rounded-none border-[3px] border-zinc-950 shadow-none backdrop:bg-zinc-950/55 sm:shadow-[10px_12px_0] sm:shadow-zinc-950',
+            default => 'hard-shadow w-90 p-6 sm:w-auto [:where(&)]:max-w-xl [:where(&)]:min-w-xs rounded-none border-[3px] border-zinc-950 backdrop:bg-zinc-950/55 backdrop:backdrop-blur-xs',
             'bare' => '',
         })
         ->add(match ($variant) {

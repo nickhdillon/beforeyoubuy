@@ -39,12 +39,32 @@
 
 @layer base {
 
+    [x-cloak] {
+        display: none !important;
+    }
+
     *,
     ::after,
     ::before,
     ::backdrop,
     ::file-selector-button {
         border-color: var(--color-gray-200, currentColor);
+    }
+}
+
+@layer utilities {
+    .hard-shadow {
+        @apply shadow-[3px_3px_0] shadow-zinc-950;
+    }
+
+    .hard-shadow-hover,
+    .hard-shadow-group-hover {
+        @apply transition-[color,background-color,border-color,box-shadow,translate] duration-200 ease-out;
+    }
+
+    .hard-shadow-hover:hover,
+    .group:hover .hard-shadow-group-hover {
+        @apply shadow-[5px_5px_0];
     }
 }
 

@@ -1,22 +1,19 @@
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <flux:heading class="sr-only">{{ __('Profile settings') }}</flux:heading>
+    <h2 class="sr-only">Profile settings</h2>
 
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
-        <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
+    <x-settings.layout current="profile" heading="Profile" subheading="Update the details tied to your account.">
+        <form wire:submit="updateProfileInformation" class="w-full space-y-6">
+            <flux:input wire:model="name" label="Name" type="text" required autofocus autocomplete="name" />
 
-            <div>
-                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
-
-            </div>
+            <flux:input wire:model="email" label="Email address" type="email" required autocomplete="email" />
 
             <div class="flex items-center gap-4">
-                <flux:button variant="primary" type="submit">{{ __('Save') }}</flux:button>
+                <flux:button variant="primary" type="submit">Save changes</flux:button>
             </div>
         </form>
 
-            <livewire:settings.delete-user-form />
+        <livewire:settings.delete-user-form />
     </x-settings.layout>
 </section>

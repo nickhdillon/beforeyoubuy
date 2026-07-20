@@ -1,51 +1,108 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:header container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
-            <flux:sidebar.toggle class="lg:hidden mr-2" icon="bars-2" inset="left" />
+    <body class="min-h-screen bg-zinc-50 text-zinc-950 antialiased selection:bg-orange-500 selection:text-white">
+        <header
+            x-data="{ mobileNavigationOpen: false }"
+            x-on:keydown.escape.window="mobileNavigationOpen = false"
+            class="relative z-30 border-b-2 border-zinc-950 bg-white"
+            data-test="app-header"
+        >
+            <div class="mx-auto flex min-h-18 w-full max-w-7xl items-center gap-4 px-4 py-3 sm:px-8 lg:px-10">
+                <x-app-logo href="{{ route('dashboard') }}" wire:navigate />
 
-            <x-app-logo href="{{ route('dashboard') }}" wire:navigate />
+                <nav class="ms-5 hidden items-center gap-2 md:flex" aria-label="Main navigation">
+                    <a
+                        href="{{ route('dashboard') }}"
+                        @class([
+                            'relative px-2 py-2 text-sm font-black transition after:absolute after:inset-x-2 after:-bottom-1 after:h-1 after:transition',
+                            'text-zinc-950 after:bg-emerald-600' => request()->routeIs('dashboard'),
+                            'text-zinc-600 after:scale-x-0 after:bg-zinc-300 hover:text-zinc-950 hover:after:scale-x-100' => ! request()->routeIs('dashboard'),
+                        ])
+                        wire:navigate
+                    >
+                        Dashboard
+                    </a>
+                </nav>
 
-            <flux:navbar class="-mb-px max-lg:hidden">
-                <flux:navbar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                    {{ __('Dashboard') }}
-                </flux:navbar.item>
-            </flux:navbar>
+                <div class="flex-1"></div>
 
-            <flux:spacer />
+                <x-desktop-user-menu />
 
-            <x-desktop-user-menu />
-        </flux:header>
+                <button
+                    type="button"
+                    class="hard-shadow hard-shadow-hover flex items-center gap-2 border-2 border-zinc-950 bg-white p-1.5 hover:bg-emerald-50 md:hidden"
+                    x-on:click="mobileNavigationOpen = ! mobileNavigationOpen"
+                    x-bind:aria-expanded="mobileNavigationOpen"
+                    aria-controls="mobile-navigation"
+                    data-test="mobile-navigation-button"
+                >
+                    <span class="grid size-8 place-items-center bg-orange-600 text-xs font-black text-white">
+                        {{ auth()->user()->initials() }}
+                    </span>
+                    <flux:icon.chevron-down class="size-4 transition" x-bind:class="mobileNavigationOpen && 'rotate-180'" />
+                    <span class="sr-only">Open account navigation</span>
+                </button>
+            </div>
 
-        <!-- Mobile Menu -->
-        <flux:sidebar collapsible="mobile" sticky class="lg:hidden border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
-            <flux:sidebar.header>
-                <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
-                <flux:sidebar.collapse class="in-data-flux-sidebar-on-desktop:not-in-data-flux-sidebar-collapsed-desktop:-mr-2" />
-            </flux:sidebar.header>
+            <div
+                id="mobile-navigation"
+                x-cloak
+                x-show="mobileNavigationOpen"
+                x-collapse
+                x-on:click.outside="mobileNavigationOpen = false"
+                class="hard-shadow absolute inset-x-0 top-full w-full bg-zinc-50 md:hidden"
+                data-test="mobile-navigation"
+            >
+                <div class="mx-auto grid w-full max-w-7xl gap-3 px-4 py-4 sm:px-8">
+                    <div class="flex items-center gap-3 border-2 border-zinc-950 bg-emerald-600 p-3 text-white">
+                        <span class="grid size-10 shrink-0 place-items-center bg-orange-600 text-sm font-black">
+                            {{ auth()->user()->initials() }}
+                        </span>
+                        <div class="min-w-0">
+                            <p class="truncate text-sm font-black">{{ auth()->user()->name }}</p>
+                            <p class="truncate text-xs font-medium text-emerald-50">{{ auth()->user()->email }}</p>
+                        </div>
+                    </div>
 
-            <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Platform')">
-                    <flux:sidebar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard')  }}
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
-            </flux:sidebar.nav>
+                    <nav class="grid gap-2" aria-label="Mobile navigation">
+                        <a
+                            href="{{ route('dashboard') }}"
+                            class="hard-shadow hard-shadow-hover flex w-full items-center gap-3 border-2 border-zinc-950 bg-white px-4 py-3 text-sm font-black hover:-translate-y-0.5 hover:bg-emerald-50"
+                            x-on:click="mobileNavigationOpen = false"
+                            wire:navigate
+                        >
+                            <flux:icon.layout-grid class="size-5 text-emerald-700" />
+                            Dashboard
+                        </a>
 
-            <flux:spacer />
+                        <a
+                            href="{{ route('profile.edit') }}"
+                            class="hard-shadow hard-shadow-hover flex w-full items-center gap-3 border-2 border-zinc-950 bg-white px-4 py-3 text-sm font-black hover:-translate-y-0.5 hover:bg-emerald-50"
+                            x-on:click="mobileNavigationOpen = false"
+                            wire:navigate
+                        >
+                            <flux:icon.cog class="size-5 text-emerald-700" />
+                            Settings
+                        </a>
 
-            <flux:sidebar.nav>
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                    {{ __('Repository') }}
-                </flux:sidebar.item>
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                    {{ __('Documentation') }}
-                </flux:sidebar.item>
-            </flux:sidebar.nav>
-        </flux:sidebar>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button
+                                type="submit"
+                                class="hard-shadow hard-shadow-hover flex w-full items-center gap-3 border-2 border-zinc-950 bg-orange-600 px-4 py-3 text-sm font-black text-white hover:-translate-y-0.5 hover:bg-orange-500"
+                                data-test="mobile-logout-button"
+                            >
+                                <flux:icon.arrow-right-start-on-rectangle class="size-5" />
+                                Log out
+                            </button>
+                        </form>
+                    </nav>
+                </div>
+            </div>
+        </header>
 
         {{ $slot }}
 
