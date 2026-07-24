@@ -1,14 +1,20 @@
 <div class="w-full">
-    <header class="flex flex-col gap-6 border-b-2 border-dashed border-emerald-200 pb-8 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-            <span class="hard-shadow inline-flex border-2 border-zinc-950 bg-orange-600 px-3 py-2 text-[11px] font-black tracking-[0.12em] text-white uppercase">Your stuff, sorted</span>
-            <h1 class="mt-6 text-4xl leading-none font-black tracking-[-0.05em] sm:text-5xl">Collections</h1>
-            <p class="mt-4 max-w-xl text-base leading-relaxed font-medium text-zinc-600 sm:text-lg">Simple homes for the things you own. Add the details to individual items when they’re useful.</p>
+    <header class="flex flex-col gap-4 border-b-2 border-dashed border-emerald-200 pb-8">
+        <span class="hard-shadow inline-flex border-2 border-zinc-950 bg-orange-600 px-3 py-2 text-[11px] font-black tracking-[0.12em] text-white uppercase w-fit">
+            Your stuff, nicely sorted
+        </span>
+
+        <div class="flex mt-2 flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h1 class="text-4xl leading-none font-black tracking-[-0.05em] sm:text-5xl">Collections</h1>
+            
+            <flux:modal.trigger name="collection-form">
+                <flux:button variant="primary" class="w-full sm:w-auto">New collection</flux:button>
+            </flux:modal.trigger>
         </div>
 
-        <flux:modal.trigger name="collection-form">
-            <flux:button variant="primary" class="w-full sm:w-auto">New collection</flux:button>
-        </flux:modal.trigger>
+        <p class="max-w-xl text-base leading-relaxed font-medium text-zinc-600 sm:text-lg">
+            Simple homes for the things you own. Add the details to individual items when they’re useful.
+        </p>
     </header>
 
     <section class="mt-8" aria-labelledby="collection-list-heading">

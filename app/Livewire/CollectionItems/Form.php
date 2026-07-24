@@ -107,6 +107,27 @@ class Form extends Component
         }
     }
 
+    public function delete(): void
+    {
+        $item = $this->item;
+        assert($item instanceof CollectionItem);
+
+        Gate::authorize('delete', $item);
+
+        $imagePath = $item->image_path;
+
+        $item->delete();
+        Storage::disk('public')->delete($imagePath);
+
+        Flux::modal('delete-collection-item')->close();
+        Flux::modal('collection-item-form')->close();
+
+        $this->resetForm();
+        $this->dispatch('collection-item-deleted');
+
+        Flux::toast(variant: 'success', text: 'Item deleted.');
+    }
+
     public function render(): View
     {
         return view('livewire.collection-items.form');

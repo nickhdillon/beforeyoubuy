@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
 class Form extends Component
@@ -62,6 +63,21 @@ class Form extends Component
         }
 
         $this->resetValidation();
+    }
+
+    public function delete(): void
+    {
+        $collection = $this->collection;
+        assert($collection instanceof Collection);
+
+        Gate::authorize('delete', $collection);
+
+        $imagePaths = $collection->items()->pluck('image_path');
+
+        $collection->delete();
+        Storage::disk('public')->delete($imagePaths->all());
+
+        $this->redirectRoute('collections.index', navigate: true);
     }
 
     public function render(): View

@@ -114,3 +114,28 @@ test('the editor cannot select an item from another collection', function () {
         ->call('edit', $otherItem->id))
         ->toThrow(ModelNotFoundException::class);
 });
+
+test('an owner can delete an item from its edit form', function () {
+    Storage::fake('public');
+    Storage::disk('public')->put('collection-items/original.jpg', 'original');
+
+    $user = User::factory()->create();
+    $collection = Collection::factory()->for($user)->create();
+    $item = CollectionItem::factory()->for($collection)->create([
+        'image_path' => 'collection-items/original.jpg',
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test(Form::class, ['collection' => $collection])
+        ->assertDontSee('data-modal="delete-collection-item"', false)
+        ->call('edit', $item->id)
+        ->assertSee('data-modal="delete-collection-item"', false)
+        ->assertDontSee('wire:confirm=', false)
+        ->call('delete')
+        ->assertSet('item', null)
+        ->assertDispatched('collection-item-deleted');
+
+    $this->assertModelMissing($item);
+    Storage::disk('public')->assertMissing('collection-items/original.jpg');
+});

@@ -1,24 +1,26 @@
 <x-layouts::app title="Dashboard">
     <div class="w-full" x-on:collection-created.window="window.location.reload()">
-        <section class="flex flex-col gap-6 border-b-2 border-dashed border-emerald-200 pb-8 sm:flex-row sm:items-end sm:justify-between">
-            <div class="max-w-2xl">
-                <span class="hard-shadow inline-flex border-2 border-zinc-950 bg-orange-600 px-3 py-2 text-[11px] font-black tracking-[0.12em] text-white uppercase">
-                    Your stuff, nicely sorted
-                </span>
-                <h1 class="mt-6 text-4xl leading-none font-black tracking-[-0.05em] sm:text-5xl">
+        <div class="flex flex-col gap-4 border-b-2 border-dashed border-emerald-200 pb-8">
+            <span class="hard-shadow inline-flex border-2 border-zinc-950 bg-orange-600 px-3 py-2 text-[11px] font-black tracking-[0.12em] text-white uppercase w-fit">
+                Your stuff, nicely sorted
+            </span>
+
+            <section class="flex mt-2 flex-col gap-4 sm:flex-row sm:items-center justify-between">
+                <h1 class="text-4xl leading-none font-black tracking-[-0.05em] sm:text-5xl">
                     Welcome back, {{ str(auth()->user()->name)->before(' ') }}.
                 </h1>
-                <p class="mt-4 max-w-xl text-base leading-relaxed font-medium text-zinc-600 sm:text-lg">
-                    Keep track of what you own, organize it into collections, and know before you buy another one.
-                </p>
-            </div>
+                
+                <flux:modal.trigger name="collection-form">
+                    <flux:button variant="primary" class="w-full sm:w-auto">
+                        New collection
+                    </flux:button>
+                </flux:modal.trigger>
+            </section>
 
-            <flux:modal.trigger name="collection-form">
-                <flux:button variant="primary" class="w-full sm:w-auto">
-                    New collection
-                </flux:button>
-            </flux:modal.trigger>
-        </section>
+            <p class="max-w-xl text-base leading-relaxed font-medium text-zinc-600 sm:text-lg">
+                Keep track of what you own, organize it into collections, and know before you buy another one.
+            </p>
+        </div>
 
         <section class="mt-8" aria-labelledby="overview-heading">
             <div class="flex items-center justify-between gap-4">

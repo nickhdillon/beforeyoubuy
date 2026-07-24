@@ -35,6 +35,12 @@ class Show extends Component
         $this->refreshItems();
     }
 
+    #[On('collection-item-deleted')]
+    public function refreshDeletedItems(): void
+    {
+        $this->refreshItems();
+    }
+
     #[On('collection-updated')]
     public function refreshCollection(): void
     {

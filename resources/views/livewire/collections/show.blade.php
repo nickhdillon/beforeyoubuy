@@ -1,11 +1,19 @@
 <div class="w-full">
-    <a href="{{ auth()->check() ? route('collections.index') : route('home') }}" class="inline-flex items-center gap-2 text-sm font-black text-emerald-700 hover:text-emerald-900" wire:navigate>← {{ auth()->check() ? 'Back to collections' : 'Before You Buy' }}</a>
+    <a
+        href="{{ auth()->check() ? route('collections.index') : route('home') }}"
+        class="inline-flex items-center gap-2 text-sm font-black text-emerald-700 hover:text-emerald-900"
+        wire:navigate
+    >
+        ← {{ auth()->check() ? 'Back to collections' : 'Before You Buy' }}
+    </a>
 
     <header class="mt-6 flex flex-col gap-4 border-b-2 border-dashed border-emerald-200 pb-8">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="min-w-0">
-                <div class="mt-2 flex w-fit max-w-full items-center gap-4">
-                    <h1 class="min-w-0 text-4xl leading-none font-black tracking-[-0.05em] break-words sm:text-5xl">{{ $collection->name }}</h1>
+                <div class="flex w-fit max-w-full items-center gap-4">
+                    <h1 class="min-w-0 text-4xl leading-none font-black tracking-[-0.05em] break-words sm:text-5xl">
+                        {{ $collection->name }}
+                    </h1>
 
                     @can('update', $collection)
                         @if ($collection->is_public)
