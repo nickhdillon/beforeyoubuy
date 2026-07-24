@@ -63,71 +63,73 @@
                 @endauth
             </div>
 
-            <div
-                id="mobile-navigation"
-                x-cloak
-                x-show="mobileNavigationOpen"
-                x-collapse
-                x-on:click.outside="mobileNavigationOpen = false"
-                class="hard-shadow absolute inset-x-0 top-full w-full bg-zinc-50 md:hidden"
-                data-test="mobile-navigation"
-            >
-                <div class="mx-auto grid w-full max-w-7xl gap-3 px-4 py-4 sm:px-8">
-                    <div class="flex items-center gap-3 border-2 border-zinc-950 bg-emerald-600 p-3 text-white">
-                        <span class="grid size-10 shrink-0 place-items-center bg-orange-600 text-sm font-black">
-                            {{ auth()->user()->initials() }}
-                        </span>
-                        <div class="min-w-0">
-                            <p class="truncate text-sm font-black">{{ auth()->user()->name }}</p>
-                            <p class="truncate text-xs font-medium text-emerald-50">{{ auth()->user()->email }}</p>
+            @auth
+                <div
+                    id="mobile-navigation"
+                    x-cloak
+                    x-show="mobileNavigationOpen"
+                    x-collapse
+                    x-on:click.outside="mobileNavigationOpen = false"
+                    class="hard-shadow absolute inset-x-0 top-full w-full bg-zinc-50 md:hidden"
+                    data-test="mobile-navigation"
+                >
+                    <div class="mx-auto grid w-full max-w-7xl gap-3 px-4 py-4 sm:px-8">
+                        <div class="flex items-center gap-3 border-2 border-zinc-950 bg-emerald-600 p-3 text-white">
+                            <span class="grid size-10 shrink-0 place-items-center bg-orange-600 text-sm font-black">
+                                {{ auth()->user()->initials() }}
+                            </span>
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-black">{{ auth()->user()->name }}</p>
+                                <p class="truncate text-xs font-medium text-emerald-50">{{ auth()->user()->email }}</p>
+                            </div>
                         </div>
-                    </div>
 
-                    <nav class="grid gap-2" aria-label="Mobile navigation">
-                        <a
-                            href="{{ route('dashboard') }}"
-                            class="hard-shadow hard-shadow-hover flex w-full items-center gap-3 border-2 border-zinc-950 bg-white px-4 py-3 text-sm font-black hover:-translate-y-0.5 hover:bg-emerald-50"
-                            x-on:click="mobileNavigationOpen = false"
-                            wire:navigate
-                        >
-                            <flux:icon.layout-grid class="size-5 text-emerald-700" />
-                            Dashboard
-                        </a>
-
-                        <a
-                            href="{{ route('collections.index') }}"
-                            class="hard-shadow hard-shadow-hover flex w-full items-center gap-3 border-2 border-zinc-950 bg-white px-4 py-3 text-sm font-black hover:-translate-y-0.5 hover:bg-emerald-50"
-                            x-on:click="mobileNavigationOpen = false"
-                            wire:navigate
-                        >
-                            <flux:icon.layout-grid class="size-5 text-emerald-700" />
-                            Collections
-                        </a>
-
-                        <a
-                            href="{{ route('profile.edit') }}"
-                            class="hard-shadow hard-shadow-hover flex w-full items-center gap-3 border-2 border-zinc-950 bg-white px-4 py-3 text-sm font-black hover:-translate-y-0.5 hover:bg-emerald-50"
-                            x-on:click="mobileNavigationOpen = false"
-                            wire:navigate
-                        >
-                            <flux:icon.cog class="size-5 text-emerald-700" />
-                            Settings
-                        </a>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button
-                                type="submit"
-                                class="hard-shadow hard-shadow-hover flex w-full items-center gap-3 border-2 border-zinc-950 bg-orange-600 px-4 py-3 text-sm font-black text-white hover:-translate-y-0.5 hover:bg-orange-500"
-                                data-test="mobile-logout-button"
+                        <nav class="grid gap-2" aria-label="Mobile navigation">
+                            <a
+                                href="{{ route('dashboard') }}"
+                                class="hard-shadow hard-shadow-hover flex w-full items-center gap-3 border-2 border-zinc-950 bg-white px-4 py-3 text-sm font-black hover:-translate-y-0.5 hover:bg-emerald-50"
+                                x-on:click="mobileNavigationOpen = false"
+                                wire:navigate
                             >
-                                <flux:icon.arrow-right-start-on-rectangle class="size-5" />
-                                Log out
-                            </button>
-                        </form>
-                    </nav>
+                                <flux:icon.layout-grid class="size-5 text-emerald-700" />
+                                Dashboard
+                            </a>
+
+                            <a
+                                href="{{ route('collections.index') }}"
+                                class="hard-shadow hard-shadow-hover flex w-full items-center gap-3 border-2 border-zinc-950 bg-white px-4 py-3 text-sm font-black hover:-translate-y-0.5 hover:bg-emerald-50"
+                                x-on:click="mobileNavigationOpen = false"
+                                wire:navigate
+                            >
+                                <flux:icon.layout-grid class="size-5 text-emerald-700" />
+                                Collections
+                            </a>
+
+                            <a
+                                href="{{ route('profile.edit') }}"
+                                class="hard-shadow hard-shadow-hover flex w-full items-center gap-3 border-2 border-zinc-950 bg-white px-4 py-3 text-sm font-black hover:-translate-y-0.5 hover:bg-emerald-50"
+                                x-on:click="mobileNavigationOpen = false"
+                                wire:navigate
+                            >
+                                <flux:icon.cog class="size-5 text-emerald-700" />
+                                Settings
+                            </a>
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button
+                                    type="submit"
+                                    class="hard-shadow hard-shadow-hover flex w-full items-center gap-3 border-2 border-zinc-950 bg-orange-600 px-4 py-3 text-sm font-black text-white hover:-translate-y-0.5 hover:bg-orange-500"
+                                    data-test="mobile-logout-button"
+                                >
+                                    <flux:icon.arrow-right-start-on-rectangle class="size-5" />
+                                    Log out
+                                </button>
+                            </form>
+                        </nav>
+                    </div>
                 </div>
-            </div>
+            @endauth
         </header>
 
         <main class="mx-auto flex w-full max-w-7xl px-4 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">

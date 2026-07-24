@@ -9,8 +9,8 @@ use App\Policies\WishlistPolicy;
 test('public collections can be viewed by anyone while private collections are owner only', function () {
     $owner = User::factory()->create();
     $otherUser = User::factory()->create();
-    $publicCollection = Collection::factory()->for($owner)->public()->create();
-    $privateCollection = Collection::factory()->for($owner)->create();
+    $publicCollection = Collection::factory()->for($owner)->public()->create(['name' => 'Public collection']);
+    $privateCollection = Collection::factory()->for($owner)->create(['name' => 'Private collection']);
     $policy = app(CollectionPolicy::class);
 
     expect($policy->view(null, $publicCollection))->toBeTrue()
@@ -53,6 +53,36 @@ test('a public collection page is available to guests without exposing its wishl
         ->assertOk()
         ->assertSee('Shared Coffee Gear')
         ->assertSee('wishlist is private');
+});
+
+test('an owner can copy the public collection link', function () {
+    $owner = User::factory()->create();
+    $publicCollection = Collection::factory()->for($owner)->public()->create(['name' => 'Public coffee gear']);
+    $privateCollection = Collection::factory()->for($owner)->create(['name' => 'Private coffee gear']);
+
+    $this->actingAs($owner)
+        ->get(route('collections.show', $publicCollection))
+        ->assertOk()
+        ->assertSee('aria-label="Copy public link"', false)
+        ->assertSee('Copied to clipboard')
+        ->assertSee('navigator.clipboard.writeText', false)
+        ->assertSee($publicCollection->slug, false);
+
+    $this->get(route('collections.show', $privateCollection))
+        ->assertOk()
+        ->assertDontSee('aria-label="Copy public link"', false)
+        ->assertDontSee('Copied to clipboard')
+        ->assertDontSee('navigator.clipboard.writeText', false);
+});
+
+test('public link controls are hidden from guests', function () {
+    $collection = Collection::factory()->public()->create();
+
+    $this->get(route('collections.show', $collection))
+        ->assertOk()
+        ->assertDontSee('aria-label="Copy public link"', false)
+        ->assertDontSee('Copied to clipboard')
+        ->assertDontSee('navigator.clipboard.writeText', false);
 });
 
 test('a private collection page is unavailable to guests and other users', function () {

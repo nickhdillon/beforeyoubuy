@@ -76,6 +76,10 @@
     @apply  !mb-0 !leading-tight;
 }
 
+[data-flux-tooltip-content] {
+    @apply rounded-none! border-2! border-zinc-950! bg-zinc-950! px-3! py-2! text-xs! font-black! text-white! shadow-[3px_3px_0] shadow-zinc-950 dark:border-zinc-950! dark:bg-zinc-950!;
+}
+
 input:focus[data-flux-control],
 textarea:focus[data-flux-control],
 select:focus[data-flux-control] {

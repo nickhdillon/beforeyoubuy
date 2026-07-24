@@ -29,7 +29,7 @@ class Collection extends Model
 
     public function items(): HasMany
     {
-        return $this->hasMany(CollectionItem::class);
+        return $this->hasMany(CollectionItem::class)->chaperone();
     }
 
     public function getRouteKeyName(): string

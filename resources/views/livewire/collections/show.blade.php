@@ -1,24 +1,93 @@
 <div class="w-full">
     <a href="{{ auth()->check() ? route('collections.index') : route('home') }}" class="inline-flex items-center gap-2 text-sm font-black text-emerald-700 hover:text-emerald-900" wire:navigate>← {{ auth()->check() ? 'Back to collections' : 'Before You Buy' }}</a>
 
-    <header class="mt-6 flex flex-col gap-6 border-b-2 border-dashed border-emerald-200 pb-8 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-            <h1 class="mt-2 text-4xl leading-none font-black tracking-[-0.05em] sm:text-5xl">{{ $collection->name }}</h1>
-            @if ($collection->description)
-                <p class="mt-4 max-w-2xl text-base leading-relaxed font-medium text-zinc-600 sm:text-lg">{{ $collection->description }}</p>
-            @endif
+    <header class="mt-6 flex flex-col gap-4 border-b-2 border-dashed border-emerald-200 pb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="min-w-0">
+                <div class="mt-2 flex w-fit max-w-full items-center gap-4">
+                    <h1 class="min-w-0 text-4xl leading-none font-black tracking-[-0.05em] break-words sm:text-5xl">{{ $collection->name }}</h1>
+
+                    @can('update', $collection)
+                        @if ($collection->is_public)
+                            <div
+                                class="relative shrink-0"
+                                x-data="{ copied: false, resetTimer: null }"
+                            >
+                                <flux:button
+                                    square
+                                    variant="secondary"
+                                    tooltip="Copy public link"
+                                    aria-label="Copy public link"
+                                    x-on:click="
+                                        navigator.clipboard.writeText(@js(route('collections.show', $collection))).then(() => {
+                                            copied = true
+                                            clearTimeout(resetTimer)
+                                            resetTimer = setTimeout(() => copied = false, 2000)
+                                        })
+                                    "
+                                >
+                                    <span class="relative block size-5.5 shrink-0">
+                                        <flux:icon.clipboard-document
+                                            class="absolute inset-0 size-5.5"
+                                            x-show="! copied"
+                                            x-transition:enter="transition-opacity duration-200"
+                                            x-transition:enter-start="opacity-0"
+                                            x-transition:enter-end="opacity-100"
+                                            x-transition:leave="transition-opacity duration-200"
+                                            x-transition:leave-start="opacity-100"
+                                            x-transition:leave-end="opacity-0"
+                                        />
+
+                                        <flux:icon.clipboard-document-check
+                                            x-cloak
+                                            class="absolute inset-0 size-5.5"
+                                            x-show="copied"
+                                            x-transition:enter="transition-opacity duration-200"
+                                            x-transition:enter-start="opacity-0"
+                                            x-transition:enter-end="opacity-100"
+                                            x-transition:leave="transition-opacity duration-200"
+                                            x-transition:leave-start="opacity-100"
+                                            x-transition:leave-end="opacity-0"
+                                        />
+                                    </span>
+                                </flux:button>
+
+                                <div
+                                    x-cloak
+                                    x-show="copied"
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="translate-y-1 scale-95 opacity-0"
+                                    x-transition:enter-end="translate-y-0 scale-100 opacity-100"
+                                    x-transition:leave="transition ease-in duration-150"
+                                    x-transition:leave-start="translate-y-0 scale-100 opacity-100"
+                                    x-transition:leave-end="translate-y-1 scale-95 opacity-0"
+                                    class="hard-shadow absolute top-full end-0 z-20 mt-2 max-w-[calc(100vw-2rem)] whitespace-nowrap border-2 border-zinc-950 bg-zinc-950 px-3 py-2 text-xs font-black text-white"
+                                    role="status"
+                                    aria-live="polite"
+                                >
+                                    Copied to clipboard
+                                </div>
+                            </div>
+                        @endif
+                    @endcan
+                </div>
+            </div>
+
+            @can('update', $collection)
+                <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                    <flux:modal.trigger name="collection-form">
+                        <flux:button variant="secondary" class="w-full sm:w-auto">Edit collection</flux:button>
+                    </flux:modal.trigger>
+                    <flux:modal.trigger name="collection-item-form">
+                        <flux:button variant="primary" class="w-full sm:w-auto">Add item</flux:button>
+                    </flux:modal.trigger>
+                </div>
+            @endcan
         </div>
 
-        @can('update', $collection)
-            <div class="flex flex-col gap-3 sm:flex-row">
-                <flux:modal.trigger name="collection-form">
-                    <flux:button variant="secondary" class="w-full sm:w-auto">Edit collection</flux:button>
-                </flux:modal.trigger>
-                <flux:modal.trigger name="collection-item-form">
-                    <flux:button variant="primary" class="w-full sm:w-auto">Add item</flux:button>
-                </flux:modal.trigger>
-            </div>
-        @endcan
+        @if ($collection->description)
+            <p class="max-w-2xl text-base leading-relaxed font-medium text-zinc-600 sm:text-lg">{{ $collection->description }}</p>
+        @endif
     </header>
 
     <section class="mt-8" aria-labelledby="items-heading">
