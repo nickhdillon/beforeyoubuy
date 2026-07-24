@@ -41,22 +41,26 @@
 
                 <div class="flex-1"></div>
 
-                <x-desktop-user-menu />
+                @auth
+                    <x-desktop-user-menu />
 
-                <button
-                    type="button"
-                    class="hard-shadow hard-shadow-hover flex items-center gap-2 border-2 border-zinc-950 bg-white p-1.5 hover:bg-emerald-50 md:hidden"
-                    x-on:click="mobileNavigationOpen = ! mobileNavigationOpen"
-                    x-bind:aria-expanded="mobileNavigationOpen"
-                    aria-controls="mobile-navigation"
-                    data-test="mobile-navigation-button"
-                >
-                    <span class="grid size-8 place-items-center bg-orange-600 text-xs font-black text-white">
-                        {{ auth()->user()->initials() }}
-                    </span>
-                    <flux:icon.chevron-down class="size-4 transition" x-bind:class="mobileNavigationOpen && 'rotate-180'" />
-                    <span class="sr-only">Open account navigation</span>
-                </button>
+                    <button
+                        type="button"
+                        class="hard-shadow hard-shadow-hover flex items-center gap-2 border-2 border-zinc-950 bg-white p-1.5 hover:bg-emerald-50 md:hidden"
+                        x-on:click="mobileNavigationOpen = ! mobileNavigationOpen"
+                        x-bind:aria-expanded="mobileNavigationOpen"
+                        aria-controls="mobile-navigation"
+                        data-test="mobile-navigation-button"
+                    >
+                        <span class="grid size-8 place-items-center bg-orange-600 text-xs font-black text-white">
+                            {{ auth()->user()->initials() }}
+                        </span>
+                        <flux:icon.chevron-down class="size-4 transition" x-bind:class="mobileNavigationOpen && 'rotate-180'" />
+                        <span class="sr-only">Open account navigation</span>
+                    </button>
+                @else
+                    <flux:button :href="route('login')" wire:navigate>Log in</flux:button>
+                @endauth
             </div>
 
             <div
@@ -126,13 +130,9 @@
             </div>
         </header>
 
-        {{ $slot }}
-
-        @persist('toast')
-            <flux:toast.group>
-                <flux:toast />
-            </flux:toast.group>
-        @endpersist
+        <main class="mx-auto flex w-full max-w-7xl px-4 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
+            {{ $slot }}
+        </main>
 
         @fluxScripts
     </body>

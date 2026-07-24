@@ -42,7 +42,7 @@
 
             <!-- Remember Me -->
             <flux:checkbox
-                    class="!rounded-none font-medium [&_[data-flux-checkbox-indicator]]:!rounded-none [&_[data-flux-checkbox-indicator]]:!border-2 [&_[data-flux-checkbox-indicator]]:!border-zinc-950 [&_[data-flux-checkbox-indicator]]:!shadow-none data-checked:[&_[data-flux-checkbox-indicator]]:!bg-emerald-600"
+                class="font-medium"
                 name="remember"
                 :label="__('Remember me')"
                 :checked="old('remember')"
