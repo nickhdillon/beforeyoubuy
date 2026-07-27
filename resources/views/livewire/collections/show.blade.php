@@ -147,7 +147,7 @@
         @else
             <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($collection->items as $item)
-                    <article wire:key="collection-item-{{ $item->id }}" class="hard-shadow hard-shadow-hover group relative flex flex-col border-2 border-zinc-950 bg-white transition hover:-translate-y-0.5">
+                    <article wire:key="collection-item-{{ $item->id }}" class="hard-shadow hard-shadow-hover group relative flex min-w-0 flex-col border-2 border-zinc-950 bg-white transition hover:-translate-y-0.5">
                         @can('update', $item)
                             <button
                                 type="button"
@@ -159,11 +159,12 @@
                             <div class="absolute top-3 end-3 z-20">
                                 <flux:dropdown position="bottom" align="end">
                                     <flux:button
-                                        square size="sm"
+                                        square
+                                        size="sm"
                                         variant="secondary"
                                         icon="ellipsis-horizontal"
                                         aria-label="Actions for {{ $item->name ?: 'untitled item' }}"
-                                        class="hard-shadow"
+                                        class="hard-shadow px-4!"
                                     />
 
                                     <flux:menu class="hard-shadow min-w-48 rounded-none! border-2! border-zinc-950! bg-white! p-1!">
@@ -193,37 +194,45 @@
                             </div>
                         @endcan
 
-                        <img
-                            src="{{ Storage::disk('public')->url($item->image_path) }}"
-                            alt="{{ $item->name ?: 'Collection item' }}"
-                            class="aspect-4/3 w-full object-cover transition group-hover:saturate-110"
-                        />
-
-                        <div class="grid grid-cols-[1fr_auto] items-center gap-3 border-y-2 border-zinc-950 bg-emerald-50 px-4 py-2">
-                            <div
-                                class="flex items-center gap-3 text-sm font-black"
-                                @if ($item->rating) aria-label="Rated {{ $item->rating }} out of 5" @endif
+                        @if ($item->quantity > 1)
+                            <span
+                                class="hard-shadow absolute top-3 start-3 z-20 border-2 border-zinc-950 bg-white px-2.5 py-1 text-xs font-black"
+                                aria-label="Quantity {{ $item->quantity }}"
                             >
+                                ×{{ Number::format($item->quantity) }}
+                            </span>
+                        @endif
+
+                        <div class="overflow-hidden border-b-2 border-zinc-950 bg-emerald-50">
+                            <img
+                                src="{{ Storage::disk('public')->url($item->image_path) }}"
+                                alt="{{ $item->name ?: 'Collection item' }}"
+                                class="aspect-4/3 w-full object-cover transition duration-300 group-hover:scale-[1.02] group-hover:saturate-110"
+                            />
+                        </div>
+
+                        <div class="flex min-w-0 flex-1 flex-col p-4">
+                            <div class="flex min-w-0 items-center justify-between gap-3">
+                                <h3 class="min-w-0 truncate text-lg leading-tight font-black tracking-tight">
+                                    {{ $item->name ?: 'Untitled item' }}
+                                </h3>
+
                                 @if ($item->rating)
-                                    <span>
+                                    <div
+                                        class="flex shrink-0 items-center gap-1.5 text-xs font-black text-zinc-700"
+                                        aria-label="Rated {{ $item->rating }} out of 5"
+                                    >
                                         <span class="text-orange-600" aria-hidden="true">★</span>
-                                        {{ (float) $item->rating === (float) (int) $item->rating ? Number::format($item->rating) : Number::format($item->rating, 1) }}
-                                    </span>
-                                @else
-                                    <span class="text-zinc-500">Not rated</span>
+                                        <span>
+                                            {{ (float) $item->rating === (float) (int) $item->rating ? Number::format($item->rating) : Number::format($item->rating, 1) }}
+                                        </span>
+                                        <span class="font-bold text-zinc-400">/ 5</span>
+                                    </div>
                                 @endif
                             </div>
 
-                            <span class="text-sm font-black">{{ Number::format($item->quantity) }}</span>
-                        </div>
-
-                        <div class="flex flex-1 flex-col px-4 py-2.5">
-                            <h3 class="min-w-0 truncate text-lg font-black tracking-tight">
-                                {{ $item->name ?: 'Untitled item' }}
-                            </h3>
-
                             @if ($item->notes)
-                                <p class="mt-3 line-clamp-2 text-sm leading-relaxed font-medium text-zinc-600">
+                                <p class="mt-2 line-clamp-2 text-sm leading-relaxed font-medium text-zinc-600">
                                     {{ $item->notes }}
                                 </p>
                             @endif
@@ -292,7 +301,7 @@
             @else
                 <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($collection->wishlist->items as $wishlistItem)
-                        <article wire:key="wishlist-item-{{ $wishlistItem->id }}" class="hard-shadow hard-shadow-hover group relative flex flex-col border-2 border-zinc-950 bg-white transition hover:-translate-y-0.5">
+                        <article wire:key="wishlist-item-{{ $wishlistItem->id }}" class="hard-shadow hard-shadow-hover group relative flex min-w-0 flex-col border-2 border-zinc-950 bg-white transition hover:-translate-y-0.5">
                             <button
                                 type="button"
                                 class="absolute inset-0 z-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange-600"
@@ -308,7 +317,7 @@
                                         variant="secondary"
                                         icon="ellipsis-horizontal"
                                         aria-label="Actions for {{ $wishlistItem->name ?: 'untitled wishlist item' }}"
-                                        class="hard-shadow"
+                                        class="hard-shadow px-4!"
                                     />
 
                                     <flux:menu class="hard-shadow min-w-48 rounded-none! border-2! border-zinc-950! bg-white! p-1!">
@@ -337,36 +346,51 @@
                                 </flux:dropdown>
                             </div>
 
-                            @if ($wishlistItem->image_path)
-                                <img
-                                    src="{{ Storage::disk('public')->url($wishlistItem->image_path) }}"
-                                    alt="{{ $wishlistItem->name ?: 'Wishlist item' }}"
-                                    class="aspect-4/3 w-full object-cover transition group-hover:saturate-110"
-                                />
+                            @if ($wishlistItem->quantity > 1)
+                                <span
+                                    class="hard-shadow absolute top-3 start-3 z-20 border-2 border-zinc-950 bg-white px-2.5 py-1 text-xs font-black"
+                                    aria-label="Quantity {{ $wishlistItem->quantity }}"
+                                >
+                                    ×{{ Number::format($wishlistItem->quantity) }}
+                                </span>
                             @endif
 
-                            <div class="grid grid-cols-[1fr_auto] items-center gap-3 border-y-2 border-zinc-950 bg-orange-50 px-4 py-2">
-                                <div class="text-sm font-black" @if ($wishlistItem->rating) aria-label="Rated {{ $wishlistItem->rating }} out of 5" @endif>
+                            <div class="grid aspect-4/3 overflow-hidden border-b-2 border-zinc-950 bg-orange-50">
+                                @if ($wishlistItem->image_path)
+                                    <img
+                                        src="{{ Storage::disk('public')->url($wishlistItem->image_path) }}"
+                                        alt="{{ $wishlistItem->name ?: 'Wishlist item' }}"
+                                        class="size-full object-cover transition duration-300 group-hover:scale-[1.02] group-hover:saturate-110"
+                                    />
+                                @else
+                                    <div class="grid place-items-center text-orange-300" aria-hidden="true">
+                                        <flux:icon.photo class="size-12" />
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="flex min-w-0 flex-1 flex-col p-4">
+                                <div class="flex min-w-0 items-center justify-between gap-3">
+                                    <h3 class="min-w-0 truncate text-lg leading-tight font-black tracking-tight">
+                                        {{ $wishlistItem->name ?: 'Untitled item' }}
+                                    </h3>
+
                                     @if ($wishlistItem->rating)
-                                        <span>
+                                        <div
+                                            class="flex shrink-0 items-center gap-1.5 text-xs font-black text-zinc-700"
+                                            aria-label="Rated {{ $wishlistItem->rating }} out of 5"
+                                        >
                                             <span class="text-orange-600" aria-hidden="true">★</span>
-                                            {{ (float) $wishlistItem->rating === (float) (int) $wishlistItem->rating ? Number::format($wishlistItem->rating) : Number::format($wishlistItem->rating, 1) }}
-                                        </span>
-                                    @else
-                                        <span class="text-zinc-500">Not rated</span>
+                                            <span>
+                                                {{ (float) $wishlistItem->rating === (float) (int) $wishlistItem->rating ? Number::format($wishlistItem->rating) : Number::format($wishlistItem->rating, 1) }}
+                                            </span>
+                                            <span class="font-bold text-zinc-400">/ 5</span>
+                                        </div>
                                     @endif
                                 </div>
 
-                                <span class="text-sm font-black">{{ Number::format($wishlistItem->quantity) }}</span>
-                            </div>
-
-                            <div class="flex flex-1 flex-col px-4 py-2.5">
-                                <h3 class="min-w-0 truncate text-lg font-black tracking-tight">
-                                    {{ $wishlistItem->name ?: 'Untitled item' }}
-                                </h3>
-
                                 @if ($wishlistItem->notes)
-                                    <p class="mt-3 line-clamp-3 text-sm leading-relaxed font-medium text-zinc-600">
+                                    <p class="mt-2 line-clamp-3 text-sm leading-relaxed font-medium text-zinc-600">
                                         {{ $wishlistItem->notes }}
                                     </p>
                                 @endif

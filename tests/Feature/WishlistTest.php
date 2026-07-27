@@ -62,6 +62,38 @@ test('wishlist items are owner only even when their collection is public', funct
         ->assertDontSee('Add wishlist item');
 });
 
+test('collection and wishlist cards present product details consistently', function () {
+    Storage::fake('public');
+
+    $owner = User::factory()->create();
+    $collection = Collection::factory()->for($owner)->create();
+
+    CollectionItem::factory()->for($collection)->create([
+        'name' => 'Ceramic dripper',
+        'quantity' => 2,
+        'rating' => 4.5,
+    ]);
+
+    WishlistItem::factory()->for($collection->wishlist)->create([
+        'name' => 'Gooseneck kettle',
+        'image_path' => null,
+        'quantity' => 1,
+        'rating' => null,
+    ]);
+
+    $this->actingAs($owner)
+        ->get(route('collections.show', $collection))
+        ->assertOk()
+        ->assertSee('aria-label="Quantity 2"', false)
+        ->assertSeeTextInOrder(['×2', 'Ceramic dripper', '4.5', '/ 5'])
+        ->assertSee('aria-label="Rated 4.5 out of 5"', false)
+        ->assertSee('Gooseneck kettle')
+        ->assertSee('class="hard-shadow hard-shadow-hover group relative flex min-w-0 flex-col', false)
+        ->assertSee('class="flex min-w-0 items-center justify-between gap-3"', false)
+        ->assertDontSee('aria-label="Quantity 1"', false)
+        ->assertDontSee('Unrated');
+});
+
 test('an owner can move a collection item to its private wishlist after confirmation', function () {
     Storage::fake('public');
     Storage::disk('public')->put('collection-items/grinder.jpg', 'photo');
