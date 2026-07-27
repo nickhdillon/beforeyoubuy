@@ -4,6 +4,7 @@ use App\Livewire\Collections\Form;
 use App\Models\Collection;
 use App\Models\CollectionItem;
 use App\Models\User;
+use App\Models\WishlistItem;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
@@ -63,12 +64,16 @@ test('an owner can delete a collection from its edit form', function () {
     Storage::fake('public');
     Storage::disk('public')->put('collection-items/first.jpg', 'first');
     Storage::disk('public')->put('collection-items/second.jpg', 'second');
+    Storage::disk('public')->put('wishlist-items/wanted.jpg', 'wanted');
 
     $user = User::factory()->create();
     $collection = Collection::factory()->for($user)->create();
     $items = CollectionItem::factory()->for($collection)->createMany([
         ['image_path' => 'collection-items/first.jpg'],
         ['image_path' => 'collection-items/second.jpg'],
+    ]);
+    $wishlistItem = WishlistItem::factory()->for($collection->wishlist)->create([
+        'image_path' => 'wishlist-items/wanted.jpg',
     ]);
 
     $this->actingAs($user);
@@ -85,9 +90,12 @@ test('an owner can delete a collection from its edit form', function () {
         $this->assertModelMissing($item);
     }
 
+    $this->assertModelMissing($wishlistItem);
+
     Storage::disk('public')->assertMissing([
         'collection-items/first.jpg',
         'collection-items/second.jpg',
+        'wishlist-items/wanted.jpg',
     ]);
 });
 

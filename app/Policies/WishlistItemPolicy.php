@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\User;
+use App\Models\Wishlist;
+use App\Models\WishlistItem;
+
+class WishlistItemPolicy
+{
+    /**
+     * Determine whether the user can view any models.
+     */
+    public function viewAny(User $user): bool
+    {
+        return true;
+    }
+
+    /**
+     * Determine whether the user can view the model.
+     */
+    public function view(?User $user, WishlistItem $wishlistItem): bool
+    {
+        return $user?->is($wishlistItem->wishlist->collection->user) ?? false;
+    }
+
+    /**
+     * Determine whether the user can create models.
+     */
+    public function create(User $user, Wishlist $wishlist): bool
+    {
+        return $user->is($wishlist->collection->user);
+    }
+
+    /**
+     * Determine whether the user can update the model.
+     */
+    public function update(User $user, WishlistItem $wishlistItem): bool
+    {
+        return $user->is($wishlistItem->wishlist->collection->user);
+    }
+
+    /**
+     * Determine whether the user can delete the model.
+     */
+    public function delete(User $user, WishlistItem $wishlistItem): bool
+    {
+        return $user->is($wishlistItem->wishlist->collection->user);
+    }
+
+    /**
+     * Determine whether the user can restore the model.
+     */
+    public function restore(User $user, WishlistItem $wishlistItem): bool
+    {
+        return $user->is($wishlistItem->wishlist->collection->user);
+    }
+
+    /**
+     * Determine whether the user can permanently delete the model.
+     */
+    public function forceDelete(User $user, WishlistItem $wishlistItem): bool
+    {
+        return $user->is($wishlistItem->wishlist->collection->user);
+    }
+}

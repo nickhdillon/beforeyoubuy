@@ -2,26 +2,26 @@
 
 namespace App\Models;
 
-use Database\Factories\CollectionItemFactory;
+use Database\Factories\WishlistItemFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['collection_id', 'image_path', 'name', 'url', 'quantity', 'notes', 'rating'])]
-class CollectionItem extends Model
+#[Fillable(['wishlist_id', 'image_path', 'name', 'url', 'notes', 'quantity', 'rating'])]
+class WishlistItem extends Model
 {
-    /** @use HasFactory<CollectionItemFactory> */
+    /** @use HasFactory<WishlistItemFactory> */
     use HasFactory;
 
     protected $attributes = [
         'quantity' => 1,
     ];
 
-    /** @return BelongsTo<Collection, $this> */
-    public function collection(): BelongsTo
+    /** @return BelongsTo<Wishlist, $this> */
+    public function wishlist(): BelongsTo
     {
-        return $this->belongsTo(Collection::class);
+        return $this->belongsTo(Wishlist::class);
     }
 
     /** @return array<string, string> */

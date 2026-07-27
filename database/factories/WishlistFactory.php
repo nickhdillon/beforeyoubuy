@@ -19,7 +19,9 @@ class WishlistFactory extends Factory
     public function definition(): array
     {
         return [
-            'collection_id' => Collection::factory(),
+            'collection_id' => fn (): int => Collection::withoutEvents(
+                fn (): Collection => Collection::factory()->create()
+            )->id,
         ];
     }
 }

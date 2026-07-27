@@ -1,13 +1,13 @@
 <div>
-    <flux:modal name="collection-item-form" class="max-w-2xl" wire:close="resetForm">
+    <flux:modal name="wishlist-item-form" class="max-w-2xl" wire:close="resetForm">
         <form wire:submit="save" class="grid gap-6">
             <div>
                 <p class="text-xs font-black tracking-[0.12em] text-orange-700 uppercase">
-                    {{ $item ? 'Item details' : 'Quick capture' }}
+                    {{ $item ? 'Wishlist details' : 'Quick capture' }}
                 </p>
 
                 <flux:heading size="xl" class="mt-1! font-black! tracking-tight!">
-                    {{ $item ? 'Edit '.($item->name ?: 'item') : 'Add to '.$collection->name }}
+                    {{ $item ? 'Edit wishlist item' : 'Add something you want' }}
                 </flux:heading>
 
                 @unless ($item)
@@ -19,15 +19,15 @@
 
             @if ($image || $item)
                 <div class="grid gap-5 sm:grid-cols-[180px_1fr] sm:items-start" x-data>
-                    <div class="hard-shadow overflow-hidden border-2 border-zinc-950 bg-emerald-50 p-2">
+                    <div class="hard-shadow overflow-hidden border-2 border-zinc-950 bg-orange-50 p-2">
                         @if ($image)
-                            <img src="{{ $image->temporaryUrl() }}" alt="Item photo preview" class="aspect-square w-full object-cover" />
-                        @elseif ($removeImage)
-                            <div class="grid aspect-square place-items-center border-2 border-dashed border-emerald-300 bg-white p-4 text-center text-xs font-black text-zinc-500">
+                            <img src="{{ $image->temporaryUrl() }}" alt="Wishlist item photo preview" class="aspect-square w-full object-cover" />
+                        @elseif ($removeImage || ! $item->image_path)
+                            <div class="grid aspect-square place-items-center border-2 border-dashed border-orange-300 bg-white p-4 text-center text-xs font-black text-zinc-500">
                                 Choose a replacement photo
                             </div>
                         @else
-                            <img src="{{ Storage::disk('public')->url($item->image_path) }}" alt="Item photo preview" class="aspect-square w-full object-cover" />
+                            <img src="{{ Storage::disk('public')->url($item->image_path) }}" alt="Wishlist item photo preview" class="aspect-square w-full object-cover" />
                         @endif
                     </div>
 
@@ -74,7 +74,7 @@
                 </flux:field>
             @endif
 
-            <flux:input wire:model="name" label="Name (optional)" placeholder="French press" />
+            <flux:input wire:model="name" label="Name (optional)" placeholder="New coffee grinder" autofocus />
 
             <flux:input wire:model="url" type="url" label="Link (optional)" placeholder="https://…" />
 
@@ -82,7 +82,7 @@
 
             <x-star-rating model="rating" :$rating />
 
-            <flux:textarea wire:model="notes" label="Notes (optional)" placeholder="Condition, size, where it came from…" rows="3" />
+            <flux:textarea wire:model="notes" label="Notes (optional)" placeholder="Size, color, or why it caught your eye…" rows="3" />
 
             @unless ($item)
                 <div class="border-2 border-dashed border-emerald-300 bg-emerald-50 p-4">
@@ -118,13 +118,13 @@
     </flux:modal>
 
     @if ($item)
-        <flux:modal name="delete-collection-item" class="max-w-md">
+        <flux:modal name="delete-wishlist-item" class="max-w-md">
             <div class="grid gap-6">
                 <div>
-                    <flux:heading size="lg" class="font-black!">Delete item?</flux:heading>
+                    <flux:heading size="lg" class="font-black!">Delete wishlist item?</flux:heading>
 
                     <flux:text class="mt-2! font-medium! text-zinc-600!">
-                        This will permanently delete {{ $item->name ?: 'this item' }} and its photo. This cannot be undone.
+                        This will permanently remove {{ $item->name ?: 'this item' }} and its photo from your wishlist. This cannot be undone.
                     </flux:text>
                 </div>
 

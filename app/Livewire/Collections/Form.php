@@ -7,7 +7,6 @@ use App\Models\User;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
@@ -72,7 +71,8 @@ class Form extends Component
 
         Gate::authorize('delete', $collection);
 
-        $imagePaths = $collection->items()->pluck('image_path');
+        $imagePaths = $collection->items()->pluck('image_path')
+            ->merge($collection->wishlist->items()->whereNotNull('image_path')->pluck('image_path'));
 
         $collection->delete();
         Storage::disk('public')->delete($imagePaths->all());
@@ -95,15 +95,11 @@ class Form extends Component
         $user = Auth::user();
         assert($user instanceof User);
 
-        DB::transaction(function () use ($user, $validated): void {
-            $collection = $user->collections()->create([
-                'name' => $validated['name'],
-                'description' => filled($validated['description']) ? $validated['description'] : null,
-                'is_public' => $validated['isPublic'],
-            ]);
-
-            $collection->wishlist()->create();
-        });
+        $user->collections()->create([
+            'name' => $validated['name'],
+            'description' => filled($validated['description']) ? $validated['description'] : null,
+            'is_public' => $validated['isPublic'],
+        ]);
 
         $this->reset(['name', 'description', 'isPublic']);
         $this->dispatch('collection-created');

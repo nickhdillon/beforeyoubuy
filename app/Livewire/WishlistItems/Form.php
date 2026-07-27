@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Livewire\CollectionItems;
+namespace App\Livewire\WishlistItems;
 
 use App\Models\Collection;
-use App\Models\CollectionItem;
+use App\Models\Wishlist;
+use App\Models\WishlistItem;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
@@ -19,7 +20,9 @@ class Form extends Component
 
     public Collection $collection;
 
-    public ?CollectionItem $item = null;
+    public Wishlist $wishlist;
+
+    public ?WishlistItem $item = null;
 
     public ?TemporaryUploadedFile $image = null;
 
@@ -27,9 +30,9 @@ class Form extends Component
 
     public string $url = '';
 
-    public int $quantity = 1;
-
     public string $notes = '';
+
+    public int $quantity = 1;
 
     public string $rating = '';
 
@@ -42,13 +45,14 @@ class Form extends Component
         Gate::authorize('update', $collection);
 
         $this->collection = $collection;
+        $this->wishlist = $collection->wishlist()->sole();
     }
 
-    #[On('edit-collection-item')]
+    #[On('edit-wishlist-item')]
     public function edit(int $itemId): void
     {
-        $item = CollectionItem::query()
-            ->whereBelongsTo($this->collection)
+        $item = WishlistItem::query()
+            ->whereBelongsTo($this->wishlist)
             ->findOrFail($itemId);
 
         Gate::authorize('update', $item);
@@ -57,30 +61,28 @@ class Form extends Component
         $this->image = null;
         $this->name = $item->name ?? '';
         $this->url = $item->url ?? '';
-        $this->quantity = $item->quantity;
         $this->notes = $item->notes ?? '';
+        $this->quantity = $item->quantity;
         $this->rating = $item->rating !== null ? (string) $item->rating : '';
         $this->createAnother = false;
         $this->removeImage = false;
         $this->resetValidation();
 
-        Flux::modal('collection-item-form')->show();
+        Flux::modal('wishlist-item-form')->show();
     }
 
     public function save(): void
     {
-        Gate::authorize('update', $this->collection);
-
         $validated = $this->validate([
-            'image' => [! $this->item || $this->removeImage ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'image' => [! $this->item || $this->removeImage || ! $this->item->image_path ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
             'name' => ['nullable', 'string', 'max:120'],
             'url' => ['nullable', 'url:http,https', 'max:2048'],
-            'quantity' => ['required', 'integer', 'min:1', 'max:9999'],
             'notes' => ['nullable', 'string', 'max:2000'],
+            'quantity' => ['required', 'integer', 'min:1', 'max:9999'],
             'rating' => ['nullable', 'numeric', 'in:0.5,1,1.5,2,2.5,3,3.5,4,4.5,5'],
         ]);
 
-        if ($this->item instanceof CollectionItem) {
+        if ($this->item instanceof WishlistItem) {
             $this->updateItem($validated);
 
             return;
@@ -89,9 +91,33 @@ class Form extends Component
         $this->createItem($validated);
     }
 
+    public function delete(): void
+    {
+        $item = $this->item;
+        assert($item instanceof WishlistItem);
+
+        Gate::authorize('delete', $item);
+
+        $imagePath = $item->image_path;
+
+        $item->delete();
+
+        if ($imagePath !== null) {
+            Storage::disk('public')->delete($imagePath);
+        }
+
+        Flux::modal('delete-wishlist-item')->close();
+        Flux::modal('wishlist-item-form')->close();
+
+        $this->resetForm();
+        $this->dispatch('wishlist-item-deleted');
+
+        Flux::toast(variant: 'success', text: 'Wishlist item deleted.');
+    }
+
     public function resetForm(): void
     {
-        $this->reset(['item', 'image', 'name', 'url', 'quantity', 'notes', 'rating', 'createAnother', 'removeImage']);
+        $this->reset(['item', 'image', 'name', 'url', 'notes', 'quantity', 'rating', 'removeImage']);
         $this->resetValidation();
     }
 
@@ -100,7 +126,7 @@ class Form extends Component
         Gate::authorize('update', $this->collection);
 
         $this->image = null;
-        $this->removeImage = $this->item instanceof CollectionItem;
+        $this->removeImage = $this->item instanceof WishlistItem;
         $this->resetValidation('image');
     }
 
@@ -111,51 +137,32 @@ class Form extends Component
         }
     }
 
-    public function delete(): void
-    {
-        $item = $this->item;
-        assert($item instanceof CollectionItem);
-
-        Gate::authorize('delete', $item);
-
-        $imagePath = $item->image_path;
-
-        $item->delete();
-        Storage::disk('public')->delete($imagePath);
-
-        Flux::modal('delete-collection-item')->close();
-        Flux::modal('collection-item-form')->close();
-
-        $this->resetForm();
-        $this->dispatch('collection-item-deleted');
-
-        Flux::toast(variant: 'success', text: 'Item deleted.');
-    }
-
     public function render(): View
     {
-        return view('livewire.collection-items.form');
+        return view('livewire.wishlist-items.form');
     }
 
     /**
-     * @param  array{image: TemporaryUploadedFile, name: string|null, url: string|null, quantity: int, notes: string|null, rating: numeric-string|null}  $validated
+     * @param  array{image: TemporaryUploadedFile, name: string|null, url: string|null, notes: string|null, quantity: int, rating: numeric-string|null}  $validated
      */
     private function createItem(array $validated): void
     {
+        Gate::authorize('create', [WishlistItem::class, $this->wishlist]);
+
         $image = $this->image;
         assert($image instanceof TemporaryUploadedFile);
 
-        $this->collection->items()->create([
-            'image_path' => $image->store('collection-items', 'public'),
+        $this->wishlist->items()->create([
+            'image_path' => $image->store('wishlist-items', 'public'),
             'name' => filled($validated['name']) ? $validated['name'] : null,
             'url' => filled($validated['url']) ? $validated['url'] : null,
-            'quantity' => $validated['quantity'],
             'notes' => filled($validated['notes']) ? $validated['notes'] : null,
+            'quantity' => $validated['quantity'],
             'rating' => filled($validated['rating']) ? $validated['rating'] : null,
         ]);
 
         $this->reset(['image', 'name', 'url', 'quantity', 'notes', 'rating']);
-        $this->dispatch('collection-item-created');
+        $this->dispatch('wishlist-item-created');
 
         if ($this->createAnother) {
             Flux::toast(variant: 'success', text: 'Item added. Add another when you’re ready.');
@@ -163,39 +170,39 @@ class Form extends Component
             return;
         }
 
-        Flux::modal('collection-item-form')->close();
-        Flux::toast(variant: 'success', text: 'Item added.');
+        Flux::modal('wishlist-item-form')->close();
+        Flux::toast(variant: 'success', text: 'Added to wishlist.');
     }
 
     /**
-     * @param  array{image: TemporaryUploadedFile|null, name: string|null, url: string|null, quantity: int, notes: string|null, rating: numeric-string|null}  $validated
+     * @param  array{image: TemporaryUploadedFile|null, name: string|null, url: string|null, notes: string|null, quantity: int, rating: numeric-string|null}  $validated
      */
     private function updateItem(array $validated): void
     {
         $item = $this->item;
-        assert($item instanceof CollectionItem);
+        assert($item instanceof WishlistItem);
 
         Gate::authorize('update', $item);
 
         $oldImagePath = $item->image_path;
-        $newImagePath = $this->image?->store('collection-items', 'public');
+        $newImagePath = $this->image?->store('wishlist-items', 'public');
 
         $item->update([
             'image_path' => $newImagePath ?? $oldImagePath,
             'name' => filled($validated['name']) ? $validated['name'] : null,
             'url' => filled($validated['url']) ? $validated['url'] : null,
-            'quantity' => $validated['quantity'],
             'notes' => filled($validated['notes']) ? $validated['notes'] : null,
+            'quantity' => $validated['quantity'],
             'rating' => filled($validated['rating']) ? $validated['rating'] : null,
         ]);
 
-        if ($newImagePath !== null) {
+        if ($newImagePath !== null && $oldImagePath !== null) {
             Storage::disk('public')->delete($oldImagePath);
         }
 
-        $this->dispatch('collection-item-updated');
+        $this->dispatch('wishlist-item-updated');
 
-        Flux::modal('collection-item-form')->close();
-        Flux::toast(variant: 'success', text: 'Item updated.');
+        Flux::modal('wishlist-item-form')->close();
+        Flux::toast(variant: 'success', text: 'Wishlist item updated.');
     }
 }

@@ -36,7 +36,7 @@ test('wishlists stay private even when their collection is public', function () 
     $owner = User::factory()->create();
     $otherUser = User::factory()->create();
     $collection = Collection::factory()->for($owner)->public()->create();
-    $wishlist = $collection->wishlist()->create();
+    $wishlist = $collection->wishlist()->sole();
     $policy = app(WishlistPolicy::class);
 
     expect($policy->view($owner, $wishlist))->toBeTrue()
@@ -46,13 +46,15 @@ test('wishlists stay private even when their collection is public', function () 
 });
 
 test('a public collection page is available to guests without exposing its wishlist', function () {
-    $collection = Collection::factory()->public()->create(['name' => 'Shared Coffee Gear']);
-    $collection->wishlist()->create();
+    $owner = User::factory()->create(['name' => 'Taylor Reed']);
+    $collection = Collection::factory()->for($owner)->public()->create(['name' => 'Shared Coffee Gear']);
 
     $this->get(route('collections.show', $collection))
         ->assertOk()
         ->assertSee('Shared Coffee Gear')
-        ->assertSee('wishlist is private');
+        ->assertSee('Collection by')
+        ->assertSee('Taylor Reed')
+        ->assertDontSee('Add wishlist item');
 });
 
 test('an owner can copy the public collection link', function () {
@@ -70,6 +72,7 @@ test('an owner can copy the public collection link', function () {
 
     $this->get(route('collections.show', $privateCollection))
         ->assertOk()
+        ->assertDontSee('Collection by')
         ->assertDontSee('aria-label="Copy public link"', false)
         ->assertDontSee('Copied to clipboard')
         ->assertDontSee('navigator.clipboard.writeText', false);
@@ -95,7 +98,7 @@ test('a private collection page is unavailable to guests and other users', funct
         ->assertForbidden();
 });
 
-test('only an owner sees collection items as edit buttons', function () {
+test('only an owner sees collection item actions', function () {
     $owner = User::factory()->create();
     $collection = Collection::factory()->for($owner)->public()->create();
     CollectionItem::factory()->for($collection)->create(['name' => 'Coffee grinder']);
@@ -103,11 +106,15 @@ test('only an owner sees collection items as edit buttons', function () {
     $this->actingAs($owner)
         ->get(route('collections.show', $collection))
         ->assertOk()
-        ->assertSee('aria-label="Edit Coffee grinder"', false);
+        ->assertSee('aria-label="Edit Coffee grinder"', false)
+        ->assertSee('aria-label="Actions for Coffee grinder"', false)
+        ->assertSee('Move to wishlist');
 
     auth()->logout();
 
     $this->get(route('collections.show', $collection))
         ->assertOk()
-        ->assertDontSee('aria-label="Edit Coffee grinder"', false);
+        ->assertDontSee('aria-label="Edit Coffee grinder"', false)
+        ->assertDontSee('aria-label="Actions for Coffee grinder"', false)
+        ->assertDontSee('Move to wishlist');
 });

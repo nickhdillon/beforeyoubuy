@@ -8,7 +8,7 @@ use Database\Seeders\DatabaseSeeder;
 test('a collection belongs to a user and has one wishlist', function () {
     $user = User::factory()->create();
     $collection = Collection::factory()->for($user)->create();
-    $wishlist = $collection->wishlist()->create();
+    $wishlist = $collection->wishlist()->sole();
 
     expect($collection->user->is($user))->toBeTrue()
         ->and($collection->wishlist->is($wishlist))->toBeTrue()

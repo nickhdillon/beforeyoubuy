@@ -58,6 +58,7 @@ test('optional item details can be saved', function () {
         ->set('name', 'Gooseneck kettle')
         ->set('quantity', 2)
         ->set('rating', '4.5')
+        ->set('url', 'https://example.com/kettle')
         ->set('notes', 'Daily driver.')
         ->call('save')
         ->assertHasNoErrors();
@@ -67,7 +68,22 @@ test('optional item details can be saved', function () {
     expect($item->name)->toBe('Gooseneck kettle')
         ->and($item->quantity)->toBe(2)
         ->and($item->rating)->toBe(4.5)
+        ->and($item->url)->toBe('https://example.com/kettle')
         ->and($item->notes)->toBe('Daily driver.');
+});
+
+test('an item link must use HTTP or HTTPS', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+    $collection = Collection::factory()->for($user)->create();
+
+    $this->actingAs($user);
+
+    Livewire::test(Form::class, ['collection' => $collection])
+        ->set('image', UploadedFile::fake()->image('kettle.jpg'))
+        ->set('url', 'javascript:alert(1)')
+        ->call('save')
+        ->assertHasErrors(['url']);
 });
 
 test('an owner can create items back to back', function () {
