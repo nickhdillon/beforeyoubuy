@@ -16,11 +16,10 @@ return new class extends Migration
             $table->foreignId('collection_id')->constrained()->cascadeOnDelete();
             $table->string('image_path');
             $table->string('name')->nullable();
-            $table->string('brand')->nullable();
-            $table->string('model_number')->nullable();
+            $table->string('url', 2048)->nullable();
+            $table->unsignedInteger('quantity')->default(1);
             $table->text('notes')->nullable();
-            $table->unsignedTinyInteger('rating')->nullable();
-            $table->date('acquired_on')->nullable();
+            $table->decimal('rating', 2, 1)->nullable();
             $table->timestamps();
 
             $table->index(['collection_id', 'created_at']);

@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('wishlist_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('wishlist_id')->constrained()->cascadeOnDelete();
-            $table->string('name', 120);
+            $table->string('image_path')->nullable();
+            $table->string('name', 120)->nullable();
             $table->string('url', 2048)->nullable();
             $table->text('notes')->nullable();
             $table->unsignedInteger('quantity')->default(1);
+            $table->decimal('rating', 2, 1)->nullable();
             $table->timestamps();
 
             $table->index(['wishlist_id', 'created_at']);
