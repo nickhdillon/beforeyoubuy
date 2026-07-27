@@ -111,6 +111,15 @@
                 {{ $collection->description }}
             </p>
         @endif
+
+        <p class="text-xs font-bold text-zinc-500">
+            <time
+                datetime="{{ $collection->last_updated_at->toAtomString() }}"
+                title="Last updated {{ $collection->last_updated_at->format('F j, Y \a\t g:i A') }}"
+            >
+                Updated {{ $collection->last_updated_at->diffForHumans() }}
+            </time>
+        </p>
     </header>
 
     <section class="mt-8" aria-labelledby="items-heading">

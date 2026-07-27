@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Database\Factories\CollectionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 #[Fillable(['user_id', 'name', 'description', 'is_public'])]
@@ -46,6 +49,19 @@ class Collection extends Model
         return [
             'is_public' => 'boolean',
         ];
+    }
+
+    /** @return Attribute<CarbonInterface, never> */
+    protected function lastUpdatedAt(): Attribute
+    {
+        return Attribute::get(function (): CarbonInterface {
+            $latestItemUpdatedAt = $this->relationLoaded('items')
+                ? $this->items->max('updated_at')
+                : $this->items()->latest('updated_at')->value('updated_at');
+
+            return Carbon::parse($latestItemUpdatedAt ?? $this->updated_at)
+                ->max($this->updated_at);
+        })->withoutObjectCaching();
     }
 
     public static function booted(): void

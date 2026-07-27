@@ -46,14 +46,21 @@ test('wishlists stay private even when their collection is public', function () 
 });
 
 test('a public collection page is available to guests without exposing its wishlist', function () {
+    $this->travelTo('2026-07-27 12:00:00');
+
     $owner = User::factory()->create(['name' => 'Taylor Reed']);
-    $collection = Collection::factory()->for($owner)->public()->create(['name' => 'Shared Coffee Gear']);
+    $collection = Collection::factory()->for($owner)->public()->create([
+        'name' => 'Shared Coffee Gear',
+        'updated_at' => '2026-07-25 12:00:00',
+    ]);
 
     $this->get(route('collections.show', $collection))
         ->assertOk()
         ->assertSee('Shared Coffee Gear')
         ->assertSee('Collection by')
         ->assertSee('Taylor Reed')
+        ->assertSee('Updated 2 days ago')
+        ->assertSee('datetime="2026-07-25T12:00:00', false)
         ->assertDontSee('Add wishlist item');
 });
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Collection;
+use App\Models\CollectionItem;
 use App\Models\User;
 use App\Models\Wishlist;
 use Database\Seeders\DatabaseSeeder;
@@ -26,6 +27,23 @@ test('collection slugs stay unique and update with their names', function () {
     $firstCollection->update(['name' => 'Daily Setup']);
 
     expect($firstCollection->fresh()->slug)->toBe('daily-setup');
+});
+
+test('a collection last updated timestamp includes its latest item update', function () {
+    $collection = Collection::factory()->create([
+        'updated_at' => '2026-01-01 12:00:00',
+    ]);
+
+    CollectionItem::factory()->for($collection)->create([
+        'updated_at' => '2026-01-03 12:00:00',
+    ]);
+
+    CollectionItem::factory()->for($collection)->create([
+        'updated_at' => '2026-01-02 12:00:00',
+    ]);
+
+    expect($collection->load('items')->last_updated_at->toDateTimeString())
+        ->toBe('2026-01-03 12:00:00');
 });
 
 test('the collections page only shows collections owned by the signed in user', function () {
