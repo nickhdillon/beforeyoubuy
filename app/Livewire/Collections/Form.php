@@ -19,7 +19,7 @@ class Form extends Component
 
     public string $description = '';
 
-    public bool $isPublic = false;
+    public bool $is_public = false;
 
     public function mount(?Collection $collection = null): void
     {
@@ -40,7 +40,7 @@ class Form extends Component
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:120'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'isPublic' => ['boolean'],
+            'is_public' => ['boolean'],
         ]);
 
         if ($this->collection instanceof Collection) {
@@ -58,7 +58,7 @@ class Form extends Component
             $this->collection->refresh();
             $this->fillFromCollection();
         } else {
-            $this->reset(['name', 'description', 'isPublic']);
+            $this->reset(['name', 'description', 'is_public']);
         }
 
         $this->resetValidation();
@@ -86,7 +86,7 @@ class Form extends Component
     }
 
     /**
-     * @param  array{name: string, description: string|null, isPublic: bool}  $validated
+     * @param  array{name: string, description: string|null, is_public: bool}  $validated
      */
     private function createCollection(array $validated): void
     {
@@ -98,10 +98,10 @@ class Form extends Component
         $user->collections()->create([
             'name' => $validated['name'],
             'description' => filled($validated['description']) ? $validated['description'] : null,
-            'is_public' => $validated['isPublic'],
+            'is_public' => $validated['is_public'],
         ]);
 
-        $this->reset(['name', 'description', 'isPublic']);
+        $this->reset(['name', 'description', 'is_public']);
         $this->dispatch('collection-created');
 
         Flux::modal('collection-form')->close();
@@ -109,7 +109,7 @@ class Form extends Component
     }
 
     /**
-     * @param  array{name: string, description: string|null, isPublic: bool}  $validated
+     * @param  array{name: string, description: string|null, is_public: bool}  $validated
      */
     private function updateCollection(array $validated): void
     {
@@ -121,7 +121,7 @@ class Form extends Component
         $collection->update([
             'name' => $validated['name'],
             'description' => filled($validated['description']) ? $validated['description'] : null,
-            'is_public' => $validated['isPublic'],
+            'is_public' => $validated['is_public'],
         ]);
 
         $freshCollection = $collection->fresh();
@@ -140,6 +140,6 @@ class Form extends Component
 
         $this->name = $collection->name;
         $this->description = $collection->description ?? '';
-        $this->isPublic = $collection->is_public;
+        $this->is_public = $collection->is_public;
     }
 }

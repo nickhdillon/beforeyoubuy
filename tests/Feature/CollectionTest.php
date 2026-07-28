@@ -19,7 +19,7 @@ test('a collection belongs to a user and has one wishlist', function () {
 
 test('collection slugs stay unique and update with their names', function () {
     $firstCollection = Collection::factory()->create(['name' => 'Coffee Gear']);
-    $secondCollection = Collection::factory()->create(['name' => 'Coffee Gear']);
+    $secondCollection = Collection::factory()->create(['name' => 'Coffee Gear 2']);
 
     expect($firstCollection->slug)->toBe('coffee-gear')
         ->and($secondCollection->slug)->toBe('coffee-gear-2');

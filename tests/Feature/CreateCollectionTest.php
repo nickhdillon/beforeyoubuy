@@ -13,7 +13,7 @@ test('a user can create a collection with its private wishlist', function () {
     Livewire::test(Form::class)
         ->set('name', 'Coffee Gear')
         ->set('description', 'My daily brewing setup.')
-        ->set('isPublic', true)
+        ->set('is_public', true)
         ->call('save')
         ->assertHasNoErrors()
         ->assertDispatched('collection-created');

@@ -66,7 +66,7 @@ class Collection extends Model
     public static function booted(): void
     {
         static::creating(function (self $collection): void {
-            $collection->slug = self::uniqueSlug($collection->name);
+            $collection->slug = Str::slug($collection->name);
         });
 
         static::created(function (self $collection): void {
@@ -75,25 +75,8 @@ class Collection extends Model
 
         static::updating(function (self $collection): void {
             if ($collection->isDirty('name')) {
-                $collection->slug = self::uniqueSlug($collection->name, $collection->getKey());
+                $collection->slug = Str::slug($collection->name);
             }
         });
-    }
-
-    private static function uniqueSlug(string $name, int|string|null $exceptId = null): string
-    {
-        $baseSlug = Str::slug($name);
-        $slug = $baseSlug;
-        $suffix = 2;
-
-        while (self::query()
-            ->when($exceptId !== null, fn ($query) => $query->whereKeyNot($exceptId))
-            ->where('slug', $slug)
-            ->exists()) {
-            $slug = "{$baseSlug}-{$suffix}";
-            $suffix++;
-        }
-
-        return $slug;
     }
 }

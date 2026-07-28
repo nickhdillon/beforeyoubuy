@@ -21,10 +21,10 @@ test('an owner can edit a collection', function () {
     $component = Livewire::test(Form::class, ['collection' => $collection])
         ->assertSet('name', 'Old name')
         ->assertSet('description', 'Old description.')
-        ->assertSet('isPublic', false)
+        ->assertSet('is_public', false)
         ->set('name', 'Coffee favorites')
         ->set('description', 'The gear I use every day.')
-        ->set('isPublic', true)
+        ->set('is_public', true)
         ->call('save')
         ->assertHasNoErrors()
         ->assertDispatched('collection-updated');
