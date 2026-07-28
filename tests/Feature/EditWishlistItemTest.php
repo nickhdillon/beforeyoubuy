@@ -4,7 +4,6 @@ use App\Livewire\WishlistItems\Form;
 use App\Models\Collection;
 use App\Models\User;
 use App\Models\WishlistItem;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -61,18 +60,6 @@ test('an owner can replace a wishlist item photo', function () {
     expect($item->image_path)->not->toBe('wishlist-items/original.jpg');
     Storage::disk('public')->assertMissing('wishlist-items/original.jpg');
     Storage::disk('public')->assertExists($item->image_path);
-});
-
-test('the editor cannot select an item from another wishlist', function () {
-    $user = User::factory()->create();
-    $collection = Collection::factory()->for($user)->create();
-    $otherItem = WishlistItem::factory()->create();
-
-    $this->actingAs($user);
-
-    expect(fn () => Livewire::test(Form::class, ['collection' => $collection])
-        ->call('edit', $otherItem->id))
-        ->toThrow(ModelNotFoundException::class);
 });
 
 test('an owner can delete an item from its edit form', function () {

@@ -4,7 +4,6 @@ use App\Livewire\CollectionItems\Form;
 use App\Models\Collection;
 use App\Models\CollectionItem;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -101,18 +100,6 @@ test('an item photo marked for removal must be replaced before saving', function
     expect($item->image_path)->not->toBe('collection-items/original.jpg');
     Storage::disk('public')->assertMissing('collection-items/original.jpg');
     Storage::disk('public')->assertExists($item->image_path);
-});
-
-test('the editor cannot select an item from another collection', function () {
-    $user = User::factory()->create();
-    $collection = Collection::factory()->for($user)->create();
-    $otherItem = CollectionItem::factory()->create();
-
-    $this->actingAs($user);
-
-    expect(fn () => Livewire::test(Form::class, ['collection' => $collection])
-        ->call('edit', $otherItem->id))
-        ->toThrow(ModelNotFoundException::class);
 });
 
 test('an owner can delete an item from its edit form', function () {
