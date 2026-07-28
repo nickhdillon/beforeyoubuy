@@ -16,7 +16,7 @@
             <flux:textarea wire:model="description" label="Description (optional)" placeholder="What belongs in this collection?" rows="4" />
 
             <div class="border-2 border-dashed border-emerald-300 bg-emerald-50 p-4">
-                <flux:switch wire:model="isPublic" label="Share publicly" description="Anyone with the link can see the collection and its items. Your wishlist always stays private." />
+                <flux:switch wire:model="is_public" label="Share publicly" description="Anyone with the link can see the collection and its items. Your wishlist always stays private." />
             </div>
 
             <div class="flex gap-3 items-center">
