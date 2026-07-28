@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Carbon\CarbonInterface;
 use Database\Factories\CollectionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -51,10 +50,10 @@ class Collection extends Model
         ];
     }
 
-    /** @return Attribute<CarbonInterface, never> */
+    /** @return Attribute<Carbon, never> */
     protected function lastUpdatedAt(): Attribute
     {
-        return Attribute::get(function (): CarbonInterface {
+        return Attribute::get(function (): Carbon {
             $latestItemUpdatedAt = $this->relationLoaded('items')
                 ? $this->items->max('updated_at')
                 : $this->items()->latest('updated_at')->value('updated_at');
