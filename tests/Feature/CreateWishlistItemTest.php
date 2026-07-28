@@ -74,5 +74,5 @@ test('another user cannot mount the wishlist form', function () {
     $this->actingAs(User::factory()->create());
 
     Livewire::test(Form::class, ['collection' => $collection])
-        ->assertForbidden();
+        ->assertNotFound();
 });

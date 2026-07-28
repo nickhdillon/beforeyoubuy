@@ -38,11 +38,11 @@ test('wishlist items are owner only even when their collection is public', funct
     $item = WishlistItem::factory()->for($wishlist)->create(['name' => 'Secret grinder']);
     $policy = app(WishlistItemPolicy::class);
 
-    expect($policy->view($owner, $item))->toBeTrue()
-        ->and($policy->view($otherUser, $item))->toBeFalse()
-        ->and($policy->view(null, $item))->toBeFalse()
-        ->and($policy->create($owner, $wishlist))->toBeTrue()
-        ->and($policy->create($otherUser, $wishlist))->toBeFalse();
+    expect($policy->view($owner, $item)->allowed())->toBeTrue()
+        ->and($policy->view($otherUser, $item)->status())->toBe(404)
+        ->and($policy->view(null, $item)->status())->toBe(404)
+        ->and($policy->create($owner, $wishlist)->allowed())->toBeTrue()
+        ->and($policy->create($otherUser, $wishlist)->status())->toBe(404);
 
     $this->actingAs($owner)
         ->get(route('collections.show', $collection))
@@ -152,12 +152,12 @@ test('another user cannot move a public collection item to its wishlist', functi
     Livewire::test(Show::class, ['collection' => $collection])
         ->assertDontSee('Move to wishlist')
         ->call('confirmMoveToWishlist', $item->id)
-        ->assertForbidden();
+        ->assertNotFound();
 
     Livewire::test(Show::class, ['collection' => $collection])
         ->assertDontSee('Delete item')
         ->call('confirmDeleteCollectionItem', $item->id)
-        ->assertForbidden();
+        ->assertNotFound();
 
     expect(WishlistItem::query()->doesntExist())->toBeTrue();
 });
@@ -270,7 +270,7 @@ test('another user cannot delete a wishlist item through the card action', funct
     Livewire::test(Show::class, ['collection' => $collection])
         ->assertDontSee('Delete item')
         ->call('confirmDeleteWishlistItem', $wishlistItem->id)
-        ->assertForbidden();
+        ->assertNotFound();
 
     $this->assertModelExists($wishlistItem);
 });

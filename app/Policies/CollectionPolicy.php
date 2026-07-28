@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Collection;
 use App\Models\User;
+use Illuminate\Auth\Access\Response;
 
 class CollectionPolicy
 {
@@ -18,9 +19,11 @@ class CollectionPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(?User $user, Collection $collection): bool
+    public function view(?User $user, Collection $collection): Response
     {
-        return $collection->is_public || $user?->is($collection->user);
+        return $collection->is_public || $user?->is($collection->user)
+            ? Response::allow()
+            : Response::denyAsNotFound();
     }
 
     /**
@@ -34,32 +37,40 @@ class CollectionPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Collection $collection): bool
+    public function update(User $user, Collection $collection): Response
     {
-        return $user->is($collection->user);
+        return $user->is($collection->user)
+            ? Response::allow()
+            : Response::denyAsNotFound();
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Collection $collection): bool
+    public function delete(User $user, Collection $collection): Response
     {
-        return $user->is($collection->user);
+        return $user->is($collection->user)
+            ? Response::allow()
+            : Response::denyAsNotFound();
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Collection $collection): bool
+    public function restore(User $user, Collection $collection): Response
     {
-        return $user->is($collection->user);
+        return $user->is($collection->user)
+            ? Response::allow()
+            : Response::denyAsNotFound();
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Collection $collection): bool
+    public function forceDelete(User $user, Collection $collection): Response
     {
-        return $user->is($collection->user);
+        return $user->is($collection->user)
+            ? Response::allow()
+            : Response::denyAsNotFound();
     }
 }

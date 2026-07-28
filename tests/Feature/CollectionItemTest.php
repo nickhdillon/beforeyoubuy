@@ -27,11 +27,11 @@ test('item visibility follows its collection while mutations remain owner only',
     $privateItem = CollectionItem::factory()->for($privateCollection)->create();
     $policy = app(CollectionItemPolicy::class);
 
-    expect($policy->view(null, $publicItem))->toBeTrue()
-        ->and($policy->view($otherUser, $publicItem))->toBeTrue()
-        ->and($policy->view(null, $privateItem))->toBeFalse()
-        ->and($policy->update($owner, $publicItem))->toBeTrue()
-        ->and($policy->update($otherUser, $publicItem))->toBeFalse();
+    expect($policy->view(null, $publicItem)->allowed())->toBeTrue()
+        ->and($policy->view($otherUser, $publicItem)->allowed())->toBeTrue()
+        ->and($policy->view(null, $privateItem)->status())->toBe(404)
+        ->and($policy->update($owner, $publicItem)->allowed())->toBeTrue()
+        ->and($policy->update($otherUser, $publicItem)->status())->toBe(404);
 });
 
 test('item policy checks reuse the collection already loaded by the page', function () {
@@ -50,7 +50,7 @@ test('item policy checks reuse the collection already loaded by the page', funct
     DB::enableQueryLog();
 
     foreach ($loadedCollection->items as $item) {
-        expect($policy->update($owner, $item))->toBeTrue();
+        expect($policy->update($owner, $item)->allowed())->toBeTrue();
     }
 
     $queries = DB::getQueryLog();

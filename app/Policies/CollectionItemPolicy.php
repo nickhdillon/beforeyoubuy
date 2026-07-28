@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\CollectionItem;
 use App\Models\User;
+use Illuminate\Auth\Access\Response;
 
 class CollectionItemPolicy
 {
@@ -18,9 +19,11 @@ class CollectionItemPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(?User $user, CollectionItem $collectionItem): bool
+    public function view(?User $user, CollectionItem $collectionItem): Response
     {
-        return $collectionItem->collection->is_public || $user?->is($collectionItem->collection->user);
+        return $collectionItem->collection->is_public || $user?->is($collectionItem->collection->user)
+            ? Response::allow()
+            : Response::denyAsNotFound();
     }
 
     /**
@@ -34,32 +37,40 @@ class CollectionItemPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, CollectionItem $collectionItem): bool
+    public function update(User $user, CollectionItem $collectionItem): Response
     {
-        return $user->is($collectionItem->collection->user);
+        return $user->is($collectionItem->collection->user)
+            ? Response::allow()
+            : Response::denyAsNotFound();
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, CollectionItem $collectionItem): bool
+    public function delete(User $user, CollectionItem $collectionItem): Response
     {
-        return $user->is($collectionItem->collection->user);
+        return $user->is($collectionItem->collection->user)
+            ? Response::allow()
+            : Response::denyAsNotFound();
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, CollectionItem $collectionItem): bool
+    public function restore(User $user, CollectionItem $collectionItem): Response
     {
-        return $user->is($collectionItem->collection->user);
+        return $user->is($collectionItem->collection->user)
+            ? Response::allow()
+            : Response::denyAsNotFound();
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, CollectionItem $collectionItem): bool
+    public function forceDelete(User $user, CollectionItem $collectionItem): Response
     {
-        return $user->is($collectionItem->collection->user);
+        return $user->is($collectionItem->collection->user)
+            ? Response::allow()
+            : Response::denyAsNotFound();
     }
 }

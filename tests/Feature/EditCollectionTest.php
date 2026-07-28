@@ -57,7 +57,7 @@ test('another user cannot open the collection editor', function () {
     $this->actingAs(User::factory()->create());
 
     Livewire::test(Form::class, ['collection' => $collection])
-        ->assertForbidden();
+        ->assertNotFound();
 });
 
 test('an owner can delete a collection from its edit form', function () {

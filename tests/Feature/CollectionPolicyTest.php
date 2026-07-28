@@ -13,11 +13,11 @@ test('public collections can be viewed by anyone while private collections are o
     $privateCollection = Collection::factory()->for($owner)->create(['name' => 'Private collection']);
     $policy = app(CollectionPolicy::class);
 
-    expect($policy->view(null, $publicCollection))->toBeTrue()
-        ->and($policy->view($otherUser, $publicCollection))->toBeTrue()
-        ->and($policy->view($owner, $privateCollection))->toBeTrue()
-        ->and($policy->view($otherUser, $privateCollection))->toBeFalse()
-        ->and($policy->view(null, $privateCollection))->toBeFalse();
+    expect($policy->view(null, $publicCollection)->allowed())->toBeTrue()
+        ->and($policy->view($otherUser, $publicCollection)->allowed())->toBeTrue()
+        ->and($policy->view($owner, $privateCollection)->allowed())->toBeTrue()
+        ->and($policy->view($otherUser, $privateCollection)->status())->toBe(404)
+        ->and($policy->view(null, $privateCollection)->status())->toBe(404);
 });
 
 test('only an owner may change their collection', function () {
@@ -26,10 +26,10 @@ test('only an owner may change their collection', function () {
     $collection = Collection::factory()->for($owner)->create();
     $policy = app(CollectionPolicy::class);
 
-    expect($policy->update($owner, $collection))->toBeTrue()
-        ->and($policy->delete($owner, $collection))->toBeTrue()
-        ->and($policy->update($otherUser, $collection))->toBeFalse()
-        ->and($policy->delete($otherUser, $collection))->toBeFalse();
+    expect($policy->update($owner, $collection)->allowed())->toBeTrue()
+        ->and($policy->delete($owner, $collection)->allowed())->toBeTrue()
+        ->and($policy->update($otherUser, $collection)->status())->toBe(404)
+        ->and($policy->delete($otherUser, $collection)->status())->toBe(404);
 });
 
 test('wishlists stay private even when their collection is public', function () {
@@ -39,10 +39,10 @@ test('wishlists stay private even when their collection is public', function () 
     $wishlist = $collection->wishlist()->sole();
     $policy = app(WishlistPolicy::class);
 
-    expect($policy->view($owner, $wishlist))->toBeTrue()
-        ->and($policy->view($otherUser, $wishlist))->toBeFalse()
-        ->and($policy->view(null, $wishlist))->toBeFalse()
-        ->and($policy->update($otherUser, $wishlist))->toBeFalse();
+    expect($policy->view($owner, $wishlist)->allowed())->toBeTrue()
+        ->and($policy->view($otherUser, $wishlist)->status())->toBe(404)
+        ->and($policy->view(null, $wishlist)->status())->toBe(404)
+        ->and($policy->update($otherUser, $wishlist)->status())->toBe(404);
 });
 
 test('a public collection page is available to guests without exposing its wishlist', function () {
@@ -98,11 +98,11 @@ test('public link controls are hidden from guests', function () {
 test('a private collection page is unavailable to guests and other users', function () {
     $collection = Collection::factory()->create();
 
-    $this->get(route('collections.show', $collection))->assertForbidden();
+    $this->get(route('collections.show', $collection))->assertNotFound();
 
     $this->actingAs(User::factory()->create())
         ->get(route('collections.show', $collection))
-        ->assertForbidden();
+        ->assertNotFound();
 });
 
 test('only an owner sees collection item actions', function () {
