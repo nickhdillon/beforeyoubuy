@@ -30,7 +30,7 @@
                 </div>
             </div>
 
-            <div class="mt-5 grid gap-4 sm:grid-cols-3">
+            <div class="mt-5 grid gap-4 sm:grid-cols-2">
                 <article class="hard-shadow border-2 border-zinc-950 bg-white p-5">
                     <p class="text-xs font-black tracking-[0.12em] text-zinc-500 uppercase">Collections</p>
                     <p class="mt-3 text-4xl font-black tracking-[-0.04em]">{{ Number::format($collections->count()) }}</p>
@@ -41,12 +41,6 @@
                     <p class="text-xs font-black tracking-[0.12em] text-emerald-50 uppercase">Items tracked</p>
                     <p class="mt-3 text-4xl font-black tracking-[-0.04em]">{{ Number::format($itemsCount) }}</p>
                     <p class="mt-2 text-sm font-medium text-emerald-50">Everything you add will count toward this total.</p>
-                </article>
-
-                <article class="hard-shadow border-2 border-zinc-950 bg-orange-600 p-5 text-white">
-                    <p class="text-xs font-black tracking-[0.12em] text-orange-50 uppercase">Shared with you</p>
-                    <p class="mt-3 text-4xl font-black tracking-[-0.04em]">0</p>
-                    <p class="mt-2 text-sm font-medium text-orange-50">Collections from friends and family will appear here.</p>
                 </article>
             </div>
         </section>

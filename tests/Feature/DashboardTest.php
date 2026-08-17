@@ -35,5 +35,6 @@ test('the dashboard displays the users collections and item totals', function ()
         ->assertSee('Coffee gear')
         ->assertSee('2 items')
         ->assertSee('href="'.route('collections.show', $collection).'"', false)
-        ->assertDontSee('Someone else’s collection');
+        ->assertDontSee('Someone else’s collection')
+        ->assertDontSee('Shared with you');
 });
