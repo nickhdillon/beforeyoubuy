@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire\Collections;
 
-use App\Models\User;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Collection;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -12,16 +14,21 @@ use Livewire\Component;
 #[Title('Collections')]
 class Index extends Component
 {
+    #[Computed]
     #[On('collection-created')]
-    public function refreshCollections(): void {}
+    public function collections(): Collection
+    {
+        return auth()
+            ->user()
+            ->collections()
+            ->with('wishlist')
+            ->withCount('items')
+            ->latest()
+            ->get();
+    }
 
     public function render(): View
     {
-        $user = Auth::user();
-        assert($user instanceof User);
-
-        return view('livewire.collections.index', [
-            'collections' => $user->collections()->with('wishlist')->withCount('items')->latest()->get(),
-        ]);
+        return view('livewire.collections.index');
     }
 }

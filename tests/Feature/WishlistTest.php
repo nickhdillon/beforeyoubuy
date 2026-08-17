@@ -1,6 +1,7 @@
 <?php
 
-use App\Livewire\Collections\Show;
+use App\Livewire\CollectionItems\Index as CollectionItemsIndex;
+use App\Livewire\WishlistItems\Index as WishlistItemsIndex;
 use App\Models\Collection;
 use App\Models\CollectionItem;
 use App\Models\User;
@@ -90,8 +91,34 @@ test('collection and wishlist cards present product details consistently', funct
         ->assertSee('Gooseneck kettle')
         ->assertSee('class="hard-shadow hard-shadow-hover group relative flex min-w-0 flex-col', false)
         ->assertSee('class="flex min-w-0 items-center justify-between gap-3"', false)
+        ->assertSee('class="grid aspect-4/3 place-items-center overflow-hidden border-b-2 border-zinc-950 bg-emerald-50"', false)
+        ->assertSee('class="grid aspect-4/3 place-items-center overflow-hidden border-b-2 border-zinc-950 bg-orange-50"', false)
         ->assertDontSee('aria-label="Quantity 1"', false)
         ->assertDontSee('Unrated');
+});
+
+test('item events refresh the computed collection and wishlist items', function () {
+    $owner = User::factory()->create();
+    $collection = Collection::factory()->for($owner)->create();
+
+    $this->actingAs($owner);
+
+    $collectionItems = Livewire::test(CollectionItemsIndex::class, ['collection' => $collection])
+        ->assertDontSee('New collection item');
+
+    $wishlistItems = Livewire::test(WishlistItemsIndex::class, ['collection' => $collection])
+        ->assertDontSee('New wishlist item');
+
+    CollectionItem::factory()->for($collection)->create(['name' => 'New collection item']);
+    WishlistItem::factory()->for($collection->wishlist)->create(['name' => 'New wishlist item']);
+
+    $collectionItems
+        ->dispatch('collection-item-created')
+        ->assertSee('New collection item');
+
+    $wishlistItems
+        ->dispatch('wishlist-item-created')
+        ->assertSee('New wishlist item');
 });
 
 test('an owner can move a collection item to its private wishlist after confirmation', function () {
@@ -111,16 +138,16 @@ test('an owner can move a collection item to its private wishlist after confirma
 
     $this->actingAs($owner);
 
-    Livewire::test(Show::class, ['collection' => $collection])
+    Livewire::test(CollectionItemsIndex::class, ['collection' => $collection])
         ->assertSee('aria-label="Edit Coffee grinder"', false)
         ->assertSee('aria-label="Actions for Coffee grinder"', false)
         ->assertSee('Move to wishlist')
         ->assertSee('data-modal="move-item-to-wishlist"', false)
         ->call('confirmMoveToWishlist', $item->id)
-        ->assertSet('wishlistSourceItemId', $item->id)
+        ->assertSet('pendingItem', fn (?CollectionItem $pendingItem): bool => $pendingItem?->is($item) === true)
         ->assertSee('Move Coffee grinder to this collection’s private wishlist?')
         ->call('moveToWishlist')
-        ->assertSet('wishlistSourceItemId', null);
+        ->assertSet('pendingItem', null);
 
     $wishlistItem = WishlistItem::query()->sole();
 
@@ -149,14 +176,14 @@ test('another user cannot move a public collection item to its wishlist', functi
 
     $this->actingAs(User::factory()->create());
 
-    Livewire::test(Show::class, ['collection' => $collection])
+    Livewire::test(CollectionItemsIndex::class, ['collection' => $collection])
         ->assertDontSee('Move to wishlist')
         ->call('confirmMoveToWishlist', $item->id)
         ->assertNotFound();
 
-    Livewire::test(Show::class, ['collection' => $collection])
+    Livewire::test(CollectionItemsIndex::class, ['collection' => $collection])
         ->assertDontSee('Delete item')
-        ->call('confirmDeleteCollectionItem', $item->id)
+        ->call('confirmDelete', $item->id)
         ->assertNotFound();
 
     expect(WishlistItem::query()->doesntExist())->toBeTrue();
@@ -175,14 +202,14 @@ test('an owner can delete a collection item from its card menu after confirmatio
 
     $this->actingAs($owner);
 
-    Livewire::test(Show::class, ['collection' => $collection])
+    Livewire::test(CollectionItemsIndex::class, ['collection' => $collection])
         ->assertSee('Delete item')
         ->assertSee('data-modal="delete-collection-item-from-card"', false)
-        ->call('confirmDeleteCollectionItem', $item->id)
-        ->assertSet('collectionItemPendingDeletionId', $item->id)
+        ->call('confirmDelete', $item->id)
+        ->assertSet('pendingItem', fn (?CollectionItem $pendingItem): bool => $pendingItem?->is($item) === true)
         ->assertSee('Permanently delete Coffee grinder and its photo?')
-        ->call('deleteCollectionItem')
-        ->assertSet('collectionItemPendingDeletionId', null)
+        ->call('delete')
+        ->assertSet('pendingItem', null)
         ->assertDontSee('Coffee grinder');
 
     $this->assertModelMissing($item);
@@ -206,16 +233,16 @@ test('an owner can move a wishlist item to its collection after confirmation', f
 
     $this->actingAs($owner);
 
-    Livewire::test(Show::class, ['collection' => $collection])
+    Livewire::test(WishlistItemsIndex::class, ['collection' => $collection])
         ->assertSee('aria-label="Edit Coffee grinder"', false)
         ->assertSee('aria-label="Actions for Coffee grinder"', false)
         ->assertSee('Move to collection')
         ->assertSee('data-modal="move-wishlist-item-to-collection"', false)
         ->call('confirmMoveToCollection', $wishlistItem->id)
-        ->assertSet('collectionSourceWishlistItemId', $wishlistItem->id)
+        ->assertSet('pendingItem', fn (?WishlistItem $pendingItem): bool => $pendingItem?->is($wishlistItem) === true)
         ->assertSee('Move Coffee grinder to this collection?')
         ->call('moveToCollection')
-        ->assertSet('collectionSourceWishlistItemId', null);
+        ->assertSet('pendingItem', null);
 
     $collectionItem = CollectionItem::query()->sole();
 
@@ -246,14 +273,14 @@ test('an owner can delete a wishlist item from its card menu after confirmation'
 
     $this->actingAs($owner);
 
-    Livewire::test(Show::class, ['collection' => $collection])
+    Livewire::test(WishlistItemsIndex::class, ['collection' => $collection])
         ->assertSee('Delete item')
         ->assertSee('data-modal="delete-wishlist-item-from-card"', false)
-        ->call('confirmDeleteWishlistItem', $wishlistItem->id)
-        ->assertSet('wishlistItemPendingDeletionId', $wishlistItem->id)
+        ->call('confirmDelete', $wishlistItem->id)
+        ->assertSet('pendingItem', fn (?WishlistItem $pendingItem): bool => $pendingItem?->is($wishlistItem) === true)
         ->assertSee('Permanently delete Coffee grinder from your wishlist?')
-        ->call('deleteWishlistItem')
-        ->assertSet('wishlistItemPendingDeletionId', null)
+        ->call('delete')
+        ->assertSet('pendingItem', null)
         ->assertDontSee('Coffee grinder');
 
     $this->assertModelMissing($wishlistItem);
@@ -267,9 +294,7 @@ test('another user cannot delete a wishlist item through the card action', funct
 
     $this->actingAs(User::factory()->create());
 
-    Livewire::test(Show::class, ['collection' => $collection])
-        ->assertDontSee('Delete item')
-        ->call('confirmDeleteWishlistItem', $wishlistItem->id)
+    Livewire::test(WishlistItemsIndex::class, ['collection' => $collection])
         ->assertNotFound();
 
     $this->assertModelExists($wishlistItem);

@@ -1,33 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire\Collections;
 
 use App\Models\Collection;
-use App\Models\User;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class Form extends Component
 {
     public ?Collection $collection = null;
 
+    #[Validate(['required', 'string', 'max:120'])]
     public string $name = '';
 
+    #[Validate(['nullable', 'string', 'max:2000'])]
     public string $description = '';
 
+    #[Validate(['boolean'])]
     public bool $is_public = false;
 
-    public function mount(?Collection $collection = null): void
+    public function mount(): void
     {
-        if ($collection instanceof Collection) {
-            Gate::authorize('update', $collection);
+        if ($this->collection) {
+            Gate::authorize('update', $this->collection);
 
-            $this->collection = $collection;
-            $this->fillFromCollection();
+            $this->name = $this->collection->name;
+            $this->description = $this->collection->description ?? '';
+            $this->is_public = $this->collection->is_public;
 
             return;
         }
@@ -37,26 +42,25 @@ class Form extends Component
 
     public function save(): void
     {
-        $validated = $this->validate([
-            'name' => ['required', 'string', 'max:120'],
-            'description' => ['nullable', 'string', 'max:2000'],
-            'is_public' => ['boolean'],
-        ]);
+        $validated = $this->validate();
 
-        if ($this->collection instanceof Collection) {
-            $this->updateCollection($validated);
+        if ($this->collection) {
+            $this->update($validated);
 
             return;
         }
 
-        $this->createCollection($validated);
+        $this->create($validated);
     }
 
     public function resetForm(): void
     {
-        if ($this->collection instanceof Collection) {
+        if ($this->collection) {
             $this->collection->refresh();
-            $this->fillFromCollection();
+
+            $this->name = $this->collection->name;
+            $this->description = $this->collection->description ?? '';
+            $this->is_public = $this->collection->is_public;
         } else {
             $this->reset(['name', 'description', 'is_public']);
         }
@@ -64,57 +68,34 @@ class Form extends Component
         $this->resetValidation();
     }
 
-    public function delete(): void
-    {
-        $collection = $this->collection;
-        assert($collection instanceof Collection);
-
-        Gate::authorize('delete', $collection);
-
-        $imagePaths = $collection->items()->pluck('image_path')
-            ->merge($collection->wishlist->items()->whereNotNull('image_path')->pluck('image_path'));
-
-        $collection->delete();
-        Storage::disk('public')->delete($imagePaths->all());
-
-        $this->redirectRoute('collections.index', navigate: true);
-    }
-
-    public function render(): View
-    {
-        return view('livewire.collections.form');
-    }
-
     /**
      * @param  array{name: string, description: string|null, is_public: bool}  $validated
      */
-    private function createCollection(array $validated): void
+    private function create(array $validated): void
     {
         Gate::authorize('create', Collection::class);
 
-        $user = Auth::user();
-        assert($user instanceof User);
-
-        $user->collections()->create([
+        auth()->user()->collections()->create([
             'name' => $validated['name'],
             'description' => filled($validated['description']) ? $validated['description'] : null,
             'is_public' => $validated['is_public'],
         ]);
 
         $this->reset(['name', 'description', 'is_public']);
+
         $this->dispatch('collection-created');
 
         Flux::modal('collection-form')->close();
+
         Flux::toast(variant: 'success', text: 'Collection created.');
     }
 
     /**
      * @param  array{name: string, description: string|null, is_public: bool}  $validated
      */
-    private function updateCollection(array $validated): void
+    private function update(array $validated): void
     {
         $collection = $this->collection;
-        assert($collection instanceof Collection);
 
         Gate::authorize('update', $collection);
 
@@ -125,21 +106,33 @@ class Form extends Component
         ]);
 
         $freshCollection = $collection->fresh();
-        assert($freshCollection instanceof Collection);
 
         $this->collection = $freshCollection;
+
         $this->dispatch('collection-updated');
 
         $this->redirectRoute('collections.show', ['collection' => $freshCollection], navigate: true);
     }
 
-    private function fillFromCollection(): void
+    public function delete(): void
     {
         $collection = $this->collection;
-        assert($collection instanceof Collection);
 
-        $this->name = $collection->name;
-        $this->description = $collection->description ?? '';
-        $this->is_public = $collection->is_public;
+        Gate::authorize('delete', $collection);
+
+        $imagePaths = $collection->items()
+            ->pluck('image_path')
+            ->merge($collection->wishlist->items()->whereNotNull('image_path')->pluck('image_path'));
+
+        $collection->delete();
+
+        Storage::disk('public')->delete($imagePaths->all());
+
+        $this->redirectRoute('collections.index', navigate: true);
+    }
+
+    public function render(): View
+    {
+        return view('livewire.collections.form');
     }
 }

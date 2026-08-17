@@ -21,10 +21,10 @@
         <div class="flex items-end justify-between gap-4">
             <h2 id="collection-list-heading" class="text-2xl font-black tracking-tight">Your collections</h2>
 
-            <span class="hard-shadow border-2 border-zinc-950 bg-white px-3 py-1 text-xs font-black">{{ $collections->count() }} {{ str('collection')->plural($collections->count()) }}</span>
+            <span class="hard-shadow border-2 border-zinc-950 bg-white px-3 py-1 text-xs font-black">{{ $this->collections->count() }} {{ str('collection')->plural($this->collections->count()) }}</span>
         </div>
 
-        @if ($collections->isEmpty())
+        @if ($this->collections->isEmpty())
             <div class="hard-shadow mt-5 border-2 border-zinc-950 bg-white p-5 sm:p-8">
                 <div class="grid gap-5 border-2 border-dashed border-emerald-300 bg-emerald-50 p-6 sm:grid-cols-[auto_1fr_auto] sm:items-center">
                     <div class="hard-shadow grid size-16 place-items-center border-2 border-zinc-950 bg-emerald-600 text-3xl" aria-hidden="true">☕</div>
@@ -39,7 +39,7 @@
             </div>
         @else
             <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach ($collections as $collection)
+                @foreach ($this->collections as $collection)
                     <a
                         href="{{ route('collections.show', $collection) }}"
                         wire:key="collection-{{ $collection->id }}"

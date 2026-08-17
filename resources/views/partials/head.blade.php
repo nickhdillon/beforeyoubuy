@@ -3,7 +3,7 @@
 <meta name="color-scheme" content="light" />
 
 <title>
-    {{ filled($title ?? null) ? $title.' - '.config('app.name', 'Laravel') : config('app.name', 'Laravel') }}
+    {{ filled($title ?? null) ? $title.' - '.config('app.name', 'Before You Buy') : config('app.name', 'Before You Buy') }}
 </title>
 
 <link rel="icon" href="/favicon.ico" sizes="any">
