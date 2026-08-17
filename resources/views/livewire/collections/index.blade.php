@@ -24,18 +24,39 @@
             <span class="hard-shadow border-2 border-zinc-950 bg-white px-3 py-1 text-xs font-black">{{ $this->collections->count() }} {{ str('collection')->plural($this->collections->count()) }}</span>
         </div>
 
+        <div class="mt-5 max-w-xl">
+            <flux:input
+                wire:model.live.debounce.300ms="search"
+                icon="magnifying-glass"
+                clearable
+                label="Search collections"
+                placeholder="Search names, descriptions, items, or tags…"
+            />
+        </div>
+
         @if ($this->collections->isEmpty())
             <div class="hard-shadow mt-5 border-2 border-zinc-950 bg-white p-5 sm:p-8">
-                <div class="grid gap-5 border-2 border-dashed border-emerald-300 bg-emerald-50 p-6 sm:grid-cols-[auto_1fr_auto] sm:items-center">
-                    <div class="hard-shadow grid size-16 place-items-center border-2 border-zinc-950 bg-emerald-600 text-3xl" aria-hidden="true">☕</div>
-                    <div>
-                        <h3 class="text-xl font-black tracking-tight">Start with one simple collection</h3>
-                        <p class="mt-2 text-sm leading-relaxed font-medium text-zinc-600">Give it a name now, then snap photos of your items as you go.</p>
+                @if (filled($search))
+                    <div class="grid gap-5 border-2 border-dashed border-orange-300 bg-orange-50 p-6 sm:grid-cols-[auto_1fr_auto] sm:items-center">
+                        <div class="hard-shadow grid size-16 place-items-center border-2 border-zinc-950 bg-orange-600 text-3xl" aria-hidden="true">⌕</div>
+                        <div>
+                            <h3 class="text-xl font-black tracking-tight">No matching collections</h3>
+                            <p class="mt-2 text-sm leading-relaxed font-medium text-zinc-600">Try a collection name, description, item detail, or tag.</p>
+                        </div>
+                        <flux:button variant="secondary" class="w-full sm:w-auto" wire:click="$set('search', '')">Clear search</flux:button>
                     </div>
-                    <flux:modal.trigger name="collection-form">
-                        <flux:button variant="secondary" class="w-full sm:w-auto">Create collection</flux:button>
-                    </flux:modal.trigger>
-                </div>
+                @else
+                    <div class="grid gap-5 border-2 border-dashed border-emerald-300 bg-emerald-50 p-6 sm:grid-cols-[auto_1fr_auto] sm:items-center">
+                        <div class="hard-shadow grid size-16 place-items-center border-2 border-zinc-950 bg-emerald-600 text-3xl" aria-hidden="true">☕</div>
+                        <div>
+                            <h3 class="text-xl font-black tracking-tight">Start with one simple collection</h3>
+                            <p class="mt-2 text-sm leading-relaxed font-medium text-zinc-600">Give it a name now, then snap photos of your items as you go.</p>
+                        </div>
+                        <flux:modal.trigger name="collection-form">
+                            <flux:button variant="secondary" class="w-full sm:w-auto">Create collection</flux:button>
+                        </flux:modal.trigger>
+                    </div>
+                @endif
             </div>
         @else
             <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

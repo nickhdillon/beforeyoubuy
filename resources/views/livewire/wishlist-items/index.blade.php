@@ -20,6 +20,16 @@
             <p class="mt-4 max-w-xl text-sm leading-relaxed font-medium text-zinc-600 sm:mt-2">
                 Keep track of what you might buy next. Your wishlist is visible only to you, even when this collection is public.
             </p>
+
+            <div class="mt-5 max-w-xl">
+                <flux:input
+                    wire:model.live.debounce.300ms="search"
+                    icon="magnifying-glass"
+                    clearable
+                    label="Search wishlist items"
+                    placeholder="Search names, notes, links, or tags…"
+                />
+            </div>
         </div>
 
         @if ($this->items->isEmpty())
@@ -29,17 +39,21 @@
 
                     <div>
                         <h3 class="text-xl font-black tracking-tight">
-                            Nothing on your wishlist
+                            {{ filled($search) ? 'No matching wishlist items' : 'Nothing on your wishlist' }}
                         </h3>
 
                         <p class="mt-2 text-sm leading-relaxed font-medium text-zinc-600">
-                            Save an idea here before it turns into an impulse purchase.
+                            {{ filled($search) ? 'Try an item name, note, link, or tag.' : 'Save an idea here before it turns into an impulse purchase.' }}
                         </p>
                     </div>
 
-                    <flux:modal.trigger name="wishlist-item-form">
-                        <flux:button variant="secondary" class="w-full sm:w-auto">Add your first item</flux:button>
-                    </flux:modal.trigger>
+                    @if (filled($search))
+                        <flux:button variant="secondary" class="w-full sm:w-auto" wire:click="$set('search', '')">Clear search</flux:button>
+                    @else
+                        <flux:modal.trigger name="wishlist-item-form">
+                            <flux:button variant="secondary" class="w-full sm:w-auto">Add your first item</flux:button>
+                        </flux:modal.trigger>
+                    @endif
                 </div>
             </div>
         @else

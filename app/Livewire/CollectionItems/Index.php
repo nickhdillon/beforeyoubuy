@@ -15,11 +15,15 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class Index extends Component
 {
     public Collection $collection;
+
+    #[Url(as: 'items', except: '')]
+    public string $search = '';
 
     public ?CollectionItem $pendingItem = null;
 
@@ -34,7 +38,10 @@ class Index extends Component
     #[On('collection-item-deleted')]
     public function items(): EloquentCollection
     {
-        return $this->collection->items()->with('tags')->get();
+        return $this->collection->items()
+            ->with('tags')
+            ->when(filled($this->search), fn ($query) => $query->search($this->search))
+            ->get();
     }
 
     public function confirmMoveToWishlist(int $itemId): void

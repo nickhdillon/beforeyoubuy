@@ -8,6 +8,16 @@
             </span>
         </div>
 
+        <div class="mt-5 max-w-xl">
+            <flux:input
+                wire:model.live.debounce.300ms="search"
+                icon="magnifying-glass"
+                clearable
+                label="Search collection items"
+                placeholder="Search names, notes, links, or tags…"
+            />
+        </div>
+
         @if ($this->items->isEmpty())
             <div class="hard-shadow mt-5 border-2 border-zinc-950 bg-white p-5 sm:p-8">
                 <div class="grid gap-5 border-2 border-dashed border-emerald-300 bg-emerald-50 p-6 sm:grid-cols-[auto_1fr_auto] sm:items-center">
@@ -15,19 +25,23 @@
 
                     <div>
                         <h3 class="text-xl font-black tracking-tight">
-                            Nothing collected yet
+                            {{ filled($search) ? 'No matching items' : 'Nothing collected yet' }}
                         </h3>
 
                         <p class="mt-2 text-sm leading-relaxed font-medium text-zinc-600">
-                            A photo is all it takes. Names, ratings, and other details can wait.
+                            {{ filled($search) ? 'Try an item name, note, link, or tag.' : 'A photo is all it takes. Names, ratings, and other details can wait.' }}
                         </p>
                     </div>
 
-                    @can('update', $collection)
+                    @if (filled($search))
+                        <flux:button variant="secondary" class="w-full sm:w-auto" wire:click="$set('search', '')">Clear search</flux:button>
+                    @else
+                        @can('update', $collection)
                         <flux:modal.trigger name="collection-item-form">
                             <flux:button variant="secondary" class="w-full sm:w-auto">Take a photo</flux:button>
                         </flux:modal.trigger>
-                    @endcan
+                        @endcan
+                    @endif
                 </div>
             </div>
         @else

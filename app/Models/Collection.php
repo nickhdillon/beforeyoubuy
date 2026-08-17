@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Database\Factories\CollectionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -35,6 +37,30 @@ class Collection extends Model
     public function items(): HasMany
     {
         return $this->hasMany(CollectionItem::class)->chaperone();
+    }
+
+    /** @param Builder<Collection> $query */
+    #[Scope]
+    protected function search(Builder $query, string $search): Builder
+    {
+        $pattern = '%'.Str::squish($search).'%';
+
+        return $query->where(function (Builder $query) use ($pattern): void {
+            $query->whereLike('name', $pattern)
+                ->orWhereLike('description', $pattern)
+                ->orWhereHas('items', function (Builder $query) use ($pattern): void {
+                    $query->whereLike('name', $pattern)
+                        ->orWhereLike('notes', $pattern)
+                        ->orWhereLike('url', $pattern)
+                        ->orWhereHas('tags', fn (Builder $query): Builder => $query->whereLike('name', $pattern));
+                })
+                ->orWhereHas('wishlist.items', function (Builder $query) use ($pattern): void {
+                    $query->whereLike('name', $pattern)
+                        ->orWhereLike('notes', $pattern)
+                        ->orWhereLike('url', $pattern)
+                        ->orWhereHas('tags', fn (Builder $query): Builder => $query->whereLike('name', $pattern));
+                });
+        });
     }
 
     public function getRouteKeyName(): string

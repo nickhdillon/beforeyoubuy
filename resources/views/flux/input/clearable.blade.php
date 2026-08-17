@@ -22,6 +22,7 @@ $attributes = $attributes->merge([
     tabindex="-1"
     aria-label="{{ __('Clear input') }}"
     data-flux-clear-button
+    data-flux-button-utility
 >
     <flux:icon.x-mark :variant="$iconVariant" />
 </flux:button>
