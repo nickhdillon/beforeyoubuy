@@ -103,7 +103,7 @@
                             </div>
 
                             @if ($collection->description)
-                                <p class="mt-2 line-clamp-2 text-sm leading-relaxed font-medium text-zinc-600">{{ $collection->description }}</p>
+                                <p class="my-2 line-clamp-2 text-sm leading-relaxed font-medium text-zinc-600">{{ $collection->description }}</p>
                             @endif
 
                             <div class="mt-auto flex items-end justify-between gap-3 border-t-2 border-dashed border-emerald-200 pt-4">

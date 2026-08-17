@@ -82,6 +82,61 @@
 
             <x-star-rating model="rating" :$rating />
 
+            <div class="grid gap-3">
+                <div class="flex items-center justify-between gap-3">
+                    <flux:label>Tags (optional)</flux:label>
+                    <a href="{{ route('tags.edit') }}" class="text-xs font-black text-emerald-700 hover:text-emerald-900" wire:navigate>Manage tags</a>
+                </div>
+
+                @if ($this->availableTags->isEmpty())
+                    <p class="border-2 border-dashed border-emerald-300 bg-emerald-50 p-3 text-sm font-medium text-zinc-600">Create tags in settings, then use them to organize your items.</p>
+                @else
+                    <flux:select
+                        wire:model.live="tagIds"
+                        variant="listbox"
+                        multiple
+                        searchable
+                        clear="close"
+                        indicator="checkbox"
+                        selected-suffix="tags selected"
+                    >
+                        <x-slot name="button">
+                            <flux:select.button
+                                placeholder="Choose tags…"
+                                clearable
+                                class="w-full"
+                            />
+                        </x-slot>
+
+                        <x-slot name="search">
+                            <flux:select.search placeholder="Search tags…" />
+                        </x-slot>
+
+                        @foreach ($this->availableTags as $tag)
+                            <flux:select.option
+                                wire:key="collection-form-tag-{{ $tag->id }}"
+                                value="{{ $tag->id }}"
+                                class="rounded-none! px-3! py-2.5! font-black! text-zinc-950! data-active:bg-emerald-100! data-selected:bg-emerald-50!"
+                            >
+                                {{ $tag->name }}
+                            </flux:select.option>
+                        @endforeach
+                    </flux:select>
+
+                    @if ($tagIds !== [])
+                        <div class="border-2 border-dashed border-emerald-300 bg-emerald-50 p-3" aria-label="Selected tags">
+                            <p class="mb-2 text-[10px] font-black tracking-[0.12em] text-emerald-800 uppercase">Selected</p>
+                            <div class="flex flex-wrap gap-2">
+                            @foreach ($this->availableTags->whereIn('id', $tagIds) as $tag)
+                                <span wire:key="selected-collection-form-tag-{{ $tag->id }}" class="border-2 border-zinc-950 bg-white px-2.5 py-1 text-xs font-black text-emerald-800">{{ $tag->name }}</span>
+                            @endforeach
+                            </div>
+                        </div>
+                    @endif
+                @endif
+                <flux:error name="tagIds.*" />
+            </div>
+
             <flux:textarea wire:model="notes" label="Notes (optional)" placeholder="Condition, size, where it came from…" rows="3" />
 
             @unless ($item)

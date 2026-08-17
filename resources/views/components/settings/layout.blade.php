@@ -6,7 +6,7 @@
     <aside class="hard-shadow border-2 border-zinc-950 bg-white p-3" aria-label="Settings navigation">
         <p class="px-3 pb-3 text-[11px] font-black tracking-[0.12em] text-emerald-700 uppercase">Account settings</p>
 
-        <nav class="grid grid-cols-2 gap-2 md:grid-cols-1">
+        <nav class="grid grid-cols-3 gap-2 md:grid-cols-1">
             <a
                 href="{{ route('profile.edit') }}"
                 @class([
@@ -17,6 +17,17 @@
                 wire:navigate
             >
                 Profile
+            </a>
+            <a
+                href="{{ route('tags.edit') }}"
+                @class([
+                    'relative border-2 px-4 py-3 text-sm font-black transition-colors after:absolute after:inset-y-0 after:left-0 after:w-1 after:bg-orange-600 after:transition-transform',
+                    'border-zinc-950 bg-emerald-600 text-white after:scale-y-100' => $current === 'tags',
+                    'border-transparent text-zinc-600 after:scale-y-0 hover:border-zinc-300 hover:bg-emerald-50 hover:text-zinc-950' => $current !== 'tags',
+                ])
+                wire:navigate
+            >
+                Tags
             </a>
             <a
                 href="{{ route('security.edit') }}"

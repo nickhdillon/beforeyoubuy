@@ -40,7 +40,7 @@ class Index extends Component
     #[On('wishlist-item-deleted')]
     public function items(): EloquentCollection
     {
-        return $this->wishlist->items()->get();
+        return $this->wishlist()->items()->with('tags')->get();
     }
 
     public function confirmMoveToCollection(int $itemId): void
@@ -118,7 +118,7 @@ class Index extends Component
     private function findItem(int $itemId): WishlistItem
     {
         return WishlistItem::query()
-            ->whereBelongsTo($this->wishlist)
+            ->whereBelongsTo($this->wishlist())
             ->findOrFail($itemId);
     }
 

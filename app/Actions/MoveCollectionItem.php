@@ -20,10 +20,12 @@ class MoveCollectionItem
 
         try {
             return DB::transaction(function () use ($destinationImagePath, $item, $wishlist): WishlistItem {
+                $tagIds = $item->tags()->pluck('tags.id');
                 $wishlistItem = $wishlist->items()->create([
                     'image_path' => $destinationImagePath,
                     ...$this->itemAttributes($item),
                 ]);
+                $wishlistItem->tags()->sync($tagIds);
 
                 $item->delete();
 
@@ -48,10 +50,12 @@ class MoveCollectionItem
 
         try {
             return DB::transaction(function () use ($collection, $destinationImagePath, $item): CollectionItem {
+                $tagIds = $item->tags()->pluck('tags.id');
                 $collectionItem = $collection->items()->create([
                     'image_path' => $destinationImagePath,
                     ...$this->itemAttributes($item),
                 ]);
+                $collectionItem->tags()->sync($tagIds);
 
                 $item->delete();
 

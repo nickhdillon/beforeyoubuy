@@ -34,7 +34,7 @@ class Index extends Component
     #[On('collection-item-deleted')]
     public function items(): EloquentCollection
     {
-        return $this->collection->items()->get();
+        return $this->collection->items()->with('tags')->get();
     }
 
     public function confirmMoveToWishlist(int $itemId): void

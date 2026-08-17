@@ -117,6 +117,14 @@
                                 @endif
                             </div>
 
+                            @if ($item->tags->isNotEmpty())
+                                <div class="mt-3 flex flex-wrap gap-1.5">
+                                    @foreach ($item->tags as $tag)
+                                        <span wire:key="collection-item-{{ $item->id }}-tag-{{ $tag->id }}" class="border border-emerald-700 bg-emerald-50 px-2 py-0.5 text-[11px] font-black text-emerald-800">{{ $tag->name }}</span>
+                                    @endforeach
+                                </div>
+                            @endif
+
                             @if ($item->notes)
                                 <p class="mt-2 line-clamp-2 text-sm leading-relaxed font-medium text-zinc-600">
                                     {{ $item->notes }}

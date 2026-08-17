@@ -4,10 +4,13 @@ namespace App\Livewire\CollectionItems;
 
 use App\Models\Collection;
 use App\Models\CollectionItem;
+use App\Models\Tag;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -37,6 +40,15 @@ class Form extends Component
 
     public bool $removeImage = false;
 
+    /** @var array<int, int|string> */
+    public array $tagIds = [];
+
+    #[Computed]
+    public function availableTags(): \Illuminate\Database\Eloquent\Collection
+    {
+        return $this->collection->user->tags()->get();
+    }
+
     public function mount(Collection $collection): void
     {
         Gate::authorize('update', $collection);
@@ -62,6 +74,7 @@ class Form extends Component
         $this->rating = $item->rating !== null ? (string) $item->rating : '';
         $this->createAnother = false;
         $this->removeImage = false;
+        $this->tagIds = $item->tags()->pluck('tags.id')->all();
         $this->resetValidation();
 
         Flux::modal('collection-item-form')->show();
@@ -78,6 +91,8 @@ class Form extends Component
             'quantity' => ['required', 'integer', 'min:1', 'max:9999'],
             'notes' => ['nullable', 'string', 'max:2000'],
             'rating' => ['nullable', 'numeric', 'in:0.5,1,1.5,2,2.5,3,3.5,4,4.5,5'],
+            'tagIds' => ['array'],
+            'tagIds.*' => ['integer', Rule::exists(Tag::class, 'id')->where('user_id', $this->collection->user_id)],
         ]);
 
         if ($this->item instanceof CollectionItem) {
@@ -91,7 +106,7 @@ class Form extends Component
 
     public function resetForm(): void
     {
-        $this->reset(['item', 'image', 'name', 'url', 'quantity', 'notes', 'rating', 'createAnother', 'removeImage']);
+        $this->reset(['item', 'image', 'name', 'url', 'quantity', 'notes', 'rating', 'createAnother', 'removeImage', 'tagIds']);
         $this->resetValidation();
     }
 
@@ -138,14 +153,14 @@ class Form extends Component
     }
 
     /**
-     * @param  array{image: TemporaryUploadedFile, name: string|null, url: string|null, quantity: int, notes: string|null, rating: numeric-string|null}  $validated
+     * @param  array{image: TemporaryUploadedFile, name: string|null, url: string|null, quantity: int, notes: string|null, rating: numeric-string|null, tagIds: array<int, int>}  $validated
      */
     private function createItem(array $validated): void
     {
         $image = $this->image;
         assert($image instanceof TemporaryUploadedFile);
 
-        $this->collection->items()->create([
+        $item = $this->collection->items()->create([
             'image_path' => $image->store('collection-items', 'public'),
             'name' => filled($validated['name']) ? $validated['name'] : null,
             'url' => filled($validated['url']) ? $validated['url'] : null,
@@ -154,7 +169,9 @@ class Form extends Component
             'rating' => filled($validated['rating']) ? $validated['rating'] : null,
         ]);
 
-        $this->reset(['image', 'name', 'url', 'quantity', 'notes', 'rating']);
+        $item->tags()->sync($validated['tagIds']);
+
+        $this->reset(['image', 'name', 'url', 'quantity', 'notes', 'rating', 'tagIds']);
         $this->dispatch('collection-item-created');
 
         if ($this->createAnother) {
@@ -168,7 +185,7 @@ class Form extends Component
     }
 
     /**
-     * @param  array{image: TemporaryUploadedFile|null, name: string|null, url: string|null, quantity: int, notes: string|null, rating: numeric-string|null}  $validated
+     * @param  array{image: TemporaryUploadedFile|null, name: string|null, url: string|null, quantity: int, notes: string|null, rating: numeric-string|null, tagIds: array<int, int>}  $validated
      */
     private function updateItem(array $validated): void
     {
@@ -188,6 +205,8 @@ class Form extends Component
             'notes' => filled($validated['notes']) ? $validated['notes'] : null,
             'rating' => filled($validated['rating']) ? $validated['rating'] : null,
         ]);
+
+        $item->tags()->sync($validated['tagIds']);
 
         if ($newImagePath !== null) {
             Storage::disk('public')->delete($oldImagePath);
