@@ -46,7 +46,7 @@ class Form extends Component
     #[Computed]
     public function availableTags(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->collection->user->tags()->get();
+        return $this->collection->user->tags;
     }
 
     public function mount(Collection $collection): void

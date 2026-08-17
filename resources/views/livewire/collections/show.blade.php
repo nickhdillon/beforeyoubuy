@@ -125,7 +125,7 @@
     <livewire:collection-items.index :$collection />
 
     @can('update', $collection)
-        <livewire:wishlist-items.index :$collection />
+        <livewire:wishlist-items.index :$collection :wishlist="$collection->wishlist" />
         <livewire:collections.form :$collection />
     @endcan
 </div>

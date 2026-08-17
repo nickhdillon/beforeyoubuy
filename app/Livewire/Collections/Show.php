@@ -23,7 +23,11 @@ class Show extends Component
     public function mount(): void
     {
         Gate::authorize('view', $this->collection);
-        $this->collection->load('user');
+        $this->collection->load('user.tags');
+
+        if (Gate::allows('update', $this->collection)) {
+            $this->collection->load('wishlist');
+        }
     }
 
     #[Computed]
@@ -38,7 +42,11 @@ class Show extends Component
     #[On('collection-updated')]
     public function refreshCollection(): void
     {
-        $this->collection->refresh()->load('user');
+        $this->collection->refresh()->load('user.tags');
+
+        if (Gate::allows('update', $this->collection)) {
+            $this->collection->load('wishlist');
+        }
         unset($this->lastUpdatedAt);
     }
 }

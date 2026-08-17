@@ -8,15 +8,72 @@
             </span>
         </div>
 
-        <div class="mt-5 max-w-xl">
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
             <flux:input
+                class="w-full sm:max-w-xl"
                 wire:model.live.debounce.300ms="search"
                 icon="magnifying-glass"
                 clearable
                 label="Search collection items"
                 placeholder="Search names, notes, links, or tags…"
             />
+
+            <flux:modal.trigger name="collection-item-filters">
+                <flux:button icon="funnel" variant="secondary" class="w-full sm:w-auto" wire:click="prepareFilters">
+                    Filters
+                    @if ($this->hasActiveFilters())
+                        <span class="size-2 bg-orange-600" aria-label="Filters active"></span>
+                    @endif
+                </flux:button>
+            </flux:modal.trigger>
         </div>
+
+        <flux:modal name="collection-item-filters" flyout variant="floating" class="md:w-96">
+            <div class="grid gap-6">
+                <div>
+                    <flux:heading size="lg" class="font-black!">Filter collection items</flux:heading>
+                    <flux:text class="mt-2! font-medium! text-zinc-600!">Narrow this collection by its item details.</flux:text>
+                </div>
+
+                <flux:select variant="listbox" wire:model="filterDraft.tagId" label="Tag" placeholder="All tags" clearable>
+                    @foreach ($this->tags as $tag)
+                        <flux:select.option wire:key="collection-filter-tag-{{ $tag->id }}" value="{{ $tag->id }}">{{ $tag->name }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+
+                <flux:select variant="listbox" wire:model="filterDraft.minimumRating" label="Rating" placeholder="Any rating" clearable>
+                    <flux:select.option value="4">4+ stars</flux:select.option>
+                    <flux:select.option value="3">3+ stars</flux:select.option>
+                    <flux:select.option value="2">2+ stars</flux:select.option>
+                    <flux:select.option value="1">1+ stars</flux:select.option>
+                </flux:select>
+
+                <flux:select variant="listbox" wire:model="filterDraft.quantity" label="Quantity" placeholder="Any quantity" clearable>
+                    <flux:select.option value="single">Single items</flux:select.option>
+                    <flux:select.option value="multiple">Multiple items</flux:select.option>
+                </flux:select>
+
+                <flux:select variant="listbox" wire:model="filterDraft.link" label="Link" placeholder="With or without" clearable>
+                    <flux:select.option value="with">Has a link</flux:select.option>
+                    <flux:select.option value="without">No link</flux:select.option>
+                </flux:select>
+
+                <flux:select variant="listbox" wire:model="filterDraft.sort" label="Sort by">
+                    <flux:select.option value="newest">Newest first</flux:select.option>
+                    <flux:select.option value="oldest">Oldest first</flux:select.option>
+                    <flux:select.option value="name">Name</flux:select.option>
+                    <flux:select.option value="rating">Highest rated</flux:select.option>
+                    <flux:select.option value="quantity">Highest quantity</flux:select.option>
+                </flux:select>
+
+                <div class="flex items-center justify-between gap-3 border-t-2 border-dashed border-emerald-200 pt-5">
+                    <flux:button variant="ghost" wire:click="clearFilterDraft">Clear all</flux:button>
+                    <flux:modal.close>
+                        <flux:button variant="primary" wire:click="applyFilters">Show results</flux:button>
+                    </flux:modal.close>
+                </div>
+            </div>
+        </flux:modal>
 
         @if ($this->items->isEmpty())
             <div class="hard-shadow mt-5 border-2 border-zinc-950 bg-white p-5 sm:p-8">
@@ -25,16 +82,16 @@
 
                     <div>
                         <h3 class="text-xl font-black tracking-tight">
-                            {{ filled($search) ? 'No matching items' : 'Nothing collected yet' }}
+                            {{ $this->hasActiveFilters() ? 'No matching items' : 'Nothing collected yet' }}
                         </h3>
 
                         <p class="mt-2 text-sm leading-relaxed font-medium text-zinc-600">
-                            {{ filled($search) ? 'Try an item name, note, link, or tag.' : 'A photo is all it takes. Names, ratings, and other details can wait.' }}
+                            {{ $this->hasActiveFilters() ? 'Try changing or clearing one of your filters.' : 'A photo is all it takes. Names, ratings, and other details can wait.' }}
                         </p>
                     </div>
 
-                    @if (filled($search))
-                        <flux:button variant="secondary" class="w-full sm:w-auto" wire:click="$set('search', '')">Clear search</flux:button>
+                    @if ($this->hasActiveFilters())
+                        <flux:button variant="secondary" class="w-full sm:w-auto" wire:click="clearFilters">Clear search &amp; filters</flux:button>
                     @else
                         @can('update', $collection)
                         <flux:modal.trigger name="collection-item-form">

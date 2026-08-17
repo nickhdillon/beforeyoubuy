@@ -33,6 +33,7 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    /** @return HasMany<Collection, $this> */
     public function collections(): HasMany
     {
         return $this->hasMany(Collection::class);

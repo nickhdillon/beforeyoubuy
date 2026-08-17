@@ -49,15 +49,15 @@ class Form extends Component
     #[Computed]
     public function availableTags(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->collection->user->tags()->get();
+        return $this->collection->user->tags;
     }
 
-    public function mount(Collection $collection): void
+    public function mount(Collection $collection, ?Wishlist $wishlist = null): void
     {
         Gate::authorize('update', $collection);
 
         $this->collection = $collection;
-        $this->wishlist = $collection->wishlist()->sole();
+        $this->wishlist = $wishlist ?? $collection->wishlist()->sole();
     }
 
     #[On('edit-wishlist-item')]

@@ -24,26 +24,88 @@
             <span class="hard-shadow border-2 border-zinc-950 bg-white px-3 py-1 text-xs font-black">{{ $this->collections->count() }} {{ str('collection')->plural($this->collections->count()) }}</span>
         </div>
 
-        <div class="mt-5 max-w-xl">
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
             <flux:input
+                class="w-full sm:max-w-xl"
                 wire:model.live.debounce.300ms="search"
                 icon="magnifying-glass"
                 clearable
                 label="Search collections"
                 placeholder="Search names, descriptions, items, or tags…"
             />
+
+            <flux:modal.trigger name="collection-filters">
+                <flux:button icon="funnel" variant="secondary" class="w-full sm:w-auto" wire:click="prepareFilters">
+                    Filters
+                    @if ($this->hasActiveFilters())
+                        <span class="size-2 bg-orange-600" aria-label="Filters active"></span>
+                    @endif
+                </flux:button>
+            </flux:modal.trigger>
         </div>
+
+        <flux:modal name="collection-filters" flyout variant="floating" class="md:w-96">
+            <div class="grid gap-6">
+                <div>
+                    <flux:heading size="lg" class="font-black!">Filter collections</flux:heading>
+                    <flux:text class="mt-2! font-medium! text-zinc-600!">Narrow collections by visibility and the items inside them.</flux:text>
+                </div>
+
+                <flux:select variant="listbox" wire:model="filterDraft.visibility" label="Visibility" placeholder="Public or private" clearable>
+                    <flux:select.option value="public">Public</flux:select.option>
+                    <flux:select.option value="private">Private</flux:select.option>
+                </flux:select>
+
+                <flux:select variant="listbox" wire:model="filterDraft.tagId" label="Item tag" placeholder="All tags" clearable>
+                    @foreach ($this->tags as $tag)
+                        <flux:select.option wire:key="collection-list-filter-tag-{{ $tag->id }}" value="{{ $tag->id }}">{{ $tag->name }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+
+                <flux:select variant="listbox" wire:model="filterDraft.minimumRating" label="Item rating" placeholder="Any rating" clearable>
+                    <flux:select.option value="4">4+ stars</flux:select.option>
+                    <flux:select.option value="3">3+ stars</flux:select.option>
+                    <flux:select.option value="2">2+ stars</flux:select.option>
+                    <flux:select.option value="1">1+ stars</flux:select.option>
+                </flux:select>
+
+                <flux:select variant="listbox" wire:model="filterDraft.quantity" label="Item quantity" placeholder="Any quantity" clearable>
+                    <flux:select.option value="single">Has single items</flux:select.option>
+                    <flux:select.option value="multiple">Has multiples</flux:select.option>
+                </flux:select>
+
+                <flux:select variant="listbox" wire:model="filterDraft.contents" label="Contents" placeholder="Anything" clearable>
+                    <flux:select.option value="collection">Has collected items</flux:select.option>
+                    <flux:select.option value="wishlist">Has wishlist items</flux:select.option>
+                    <flux:select.option value="empty">Empty collections</flux:select.option>
+                </flux:select>
+
+                <flux:select variant="listbox" wire:model="filterDraft.sort" label="Sort by">
+                    <flux:select.option value="newest">Newest first</flux:select.option>
+                    <flux:select.option value="oldest">Oldest first</flux:select.option>
+                    <flux:select.option value="name">Name</flux:select.option>
+                    <flux:select.option value="items">Most items</flux:select.option>
+                </flux:select>
+
+                <div class="flex items-center justify-between gap-3 border-t-2 border-dashed border-emerald-200 pt-5">
+                    <flux:button variant="ghost" wire:click="clearFilterDraft">Clear all</flux:button>
+                    <flux:modal.close>
+                        <flux:button variant="primary" wire:click="applyFilters">Show results</flux:button>
+                    </flux:modal.close>
+                </div>
+            </div>
+        </flux:modal>
 
         @if ($this->collections->isEmpty())
             <div class="hard-shadow mt-5 border-2 border-zinc-950 bg-white p-5 sm:p-8">
-                @if (filled($search))
+                @if ($this->hasActiveFilters())
                     <div class="grid gap-5 border-2 border-dashed border-orange-300 bg-orange-50 p-6 sm:grid-cols-[auto_1fr_auto] sm:items-center">
                         <div class="hard-shadow grid size-16 place-items-center border-2 border-zinc-950 bg-orange-600 text-3xl" aria-hidden="true">⌕</div>
                         <div>
                             <h3 class="text-xl font-black tracking-tight">No matching collections</h3>
-                            <p class="mt-2 text-sm leading-relaxed font-medium text-zinc-600">Try a collection name, description, item detail, or tag.</p>
+                            <p class="mt-2 text-sm leading-relaxed font-medium text-zinc-600">Try changing or clearing one of your filters.</p>
                         </div>
-                        <flux:button variant="secondary" class="w-full sm:w-auto" wire:click="$set('search', '')">Clear search</flux:button>
+                        <flux:button variant="secondary" class="w-full sm:w-auto" wire:click="clearFilters">Clear search &amp; filters</flux:button>
                     </div>
                 @else
                     <div class="grid gap-5 border-2 border-dashed border-emerald-300 bg-emerald-50 p-6 sm:grid-cols-[auto_1fr_auto] sm:items-center">

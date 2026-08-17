@@ -8,6 +8,7 @@ use App\Actions\MoveCollectionItem;
 use App\Models\Collection;
 use App\Models\Wishlist;
 use App\Models\WishlistItem;
+use App\Queries\FilterItemQuery;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -22,20 +23,45 @@ class Index extends Component
 {
     public Collection $collection;
 
+    public Wishlist $wishlist;
+
     #[Url(as: 'wishlist', except: '')]
     public string $search = '';
 
+    #[Url(as: 'wishlist-tag', except: '')]
+    public string $tagId = '';
+
+    #[Url(as: 'wishlist-rating', except: '')]
+    public string $minimumRating = '';
+
+    #[Url(as: 'wishlist-quantity', except: '')]
+    public string $quantity = '';
+
+    #[Url(as: 'wishlist-link', except: '')]
+    public string $link = '';
+
+    #[Url(as: 'wishlist-photo', except: '')]
+    public string $photo = '';
+
+    #[Url(as: 'wishlist-sort', except: 'newest')]
+    public string $sort = 'newest';
+
+    /** @var array{tagId: string, minimumRating: string, quantity: string, link: string, photo: string, sort: string} */
+    public array $filterDraft = [
+        'tagId' => '',
+        'minimumRating' => '',
+        'quantity' => '',
+        'link' => '',
+        'photo' => '',
+        'sort' => 'newest',
+    ];
+
     public ?WishlistItem $pendingItem = null;
 
-    public function mount(): void
+    public function mount(?Wishlist $wishlist = null): void
     {
         Gate::authorize('update', $this->collection);
-    }
-
-    #[Computed]
-    public function wishlist(): Wishlist
-    {
-        return $this->collection->wishlist()->sole();
+        $this->wishlist = $wishlist ?? $this->collection->wishlist()->sole();
     }
 
     #[Computed]
@@ -44,10 +70,81 @@ class Index extends Component
     #[On('wishlist-item-deleted')]
     public function items(): EloquentCollection
     {
-        return $this->wishlist()->items()
+        $query = WishlistItem::query()
+            ->whereBelongsTo($this->wishlist)
             ->with('tags')
-            ->when(filled($this->search), fn ($query) => $query->search($this->search))
-            ->get();
+            ->when(filled($this->search), fn ($query) => $query->search($this->search));
+
+        foreach ($this->activeFilters() as $type => $value) {
+            $query = FilterItemQuery::apply($query, $type, $value);
+        }
+
+        return FilterItemQuery::apply($query, 'sort_'.$this->sort, $this->sort)->get();
+    }
+
+    #[Computed]
+    public function tags(): EloquentCollection
+    {
+        return $this->collection->user->tags;
+    }
+
+    public function clearFilters(): void
+    {
+        $this->reset('search', 'tagId', 'minimumRating', 'quantity', 'link', 'photo');
+        $this->sort = 'newest';
+        $this->prepareFilters();
+    }
+
+    public function prepareFilters(): void
+    {
+        $this->filterDraft = [
+            'tagId' => $this->tagId,
+            'minimumRating' => $this->minimumRating,
+            'quantity' => $this->quantity,
+            'link' => $this->link,
+            'photo' => $this->photo,
+            'sort' => $this->sort,
+        ];
+    }
+
+    public function clearFilterDraft(): void
+    {
+        $this->filterDraft = [
+            'tagId' => '',
+            'minimumRating' => '',
+            'quantity' => '',
+            'link' => '',
+            'photo' => '',
+            'sort' => 'newest',
+        ];
+    }
+
+    public function applyFilters(): void
+    {
+        $this->tagId = $this->filterDraft['tagId'];
+        $this->minimumRating = $this->filterDraft['minimumRating'];
+        $this->quantity = $this->filterDraft['quantity'];
+        $this->link = $this->filterDraft['link'];
+        $this->photo = $this->filterDraft['photo'];
+        $this->sort = $this->filterDraft['sort'];
+    }
+
+    public function hasActiveFilters(): bool
+    {
+        return filled($this->search) || filled($this->tagId) || filled($this->minimumRating)
+            || filled($this->quantity) || filled($this->link) || filled($this->photo) || $this->sort !== 'newest';
+    }
+
+    /** @return array<string, int|float|string> */
+    private function activeFilters(): array
+    {
+        return array_filter([
+            'tag' => filled($this->tagId) ? (int) $this->tagId : null,
+            'minimum_rating' => filled($this->minimumRating) ? (float) $this->minimumRating : null,
+            'quantity' => $this->quantity,
+            'link' => $this->link,
+            'photo' => $this->photo,
+        ], fn (mixed $value): bool => filled($value));
     }
 
     public function confirmMoveToCollection(int $itemId): void
@@ -125,7 +222,7 @@ class Index extends Component
     private function findItem(int $itemId): WishlistItem
     {
         return WishlistItem::query()
-            ->whereBelongsTo($this->wishlist())
+            ->whereBelongsTo($this->wishlist)
             ->findOrFail($itemId);
     }
 

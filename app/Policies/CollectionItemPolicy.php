@@ -21,7 +21,7 @@ class CollectionItemPolicy
      */
     public function view(?User $user, CollectionItem $collectionItem): Response
     {
-        return $collectionItem->collection->is_public || $user?->is($collectionItem->collection->user)
+        return $collectionItem->collection->is_public || $user?->getKey() === $collectionItem->collection->user_id
             ? Response::allow()
             : Response::denyAsNotFound();
     }
@@ -39,7 +39,7 @@ class CollectionItemPolicy
      */
     public function update(User $user, CollectionItem $collectionItem): Response
     {
-        return $user->is($collectionItem->collection->user)
+        return $user->getKey() === $collectionItem->collection->user_id
             ? Response::allow()
             : Response::denyAsNotFound();
     }
@@ -49,7 +49,7 @@ class CollectionItemPolicy
      */
     public function delete(User $user, CollectionItem $collectionItem): Response
     {
-        return $user->is($collectionItem->collection->user)
+        return $user->getKey() === $collectionItem->collection->user_id
             ? Response::allow()
             : Response::denyAsNotFound();
     }
@@ -59,7 +59,7 @@ class CollectionItemPolicy
      */
     public function restore(User $user, CollectionItem $collectionItem): Response
     {
-        return $user->is($collectionItem->collection->user)
+        return $user->getKey() === $collectionItem->collection->user_id
             ? Response::allow()
             : Response::denyAsNotFound();
     }
@@ -69,7 +69,7 @@ class CollectionItemPolicy
      */
     public function forceDelete(User $user, CollectionItem $collectionItem): Response
     {
-        return $user->is($collectionItem->collection->user)
+        return $user->getKey() === $collectionItem->collection->user_id
             ? Response::allow()
             : Response::denyAsNotFound();
     }
