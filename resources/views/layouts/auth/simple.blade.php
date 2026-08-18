@@ -37,6 +37,8 @@
             </main>
         </div>
 
+        <x-app-footer />
+
         @persist('toast')
             <flux:toast.group>
                 <flux:toast />

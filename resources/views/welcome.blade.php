@@ -142,9 +142,7 @@
                 </section>
             </main>
 
-            <footer class="relative z-10 mx-auto flex max-w-7xl flex-col gap-2 px-5 pb-8 text-center text-xs font-semibold text-zinc-700/50 sm:px-8 lg:px-10">
-                <p>Organize what you own and share collections with friends and family.</p>
-            </footer>
+            <x-app-footer />
         </div>
     </body>
 </html>

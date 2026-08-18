@@ -136,6 +136,8 @@
             {{ $slot }}
         </main>
 
+        <x-app-footer />
+
         @fluxScripts
     </body>
 </html>
