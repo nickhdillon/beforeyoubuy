@@ -1,19 +1,10 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scheme-light">
     <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="color-scheme" content="light">
-        <meta name="description" content="Keep track of what you and the people you care about already own before buying something twice.">
-
-        <title>Shop smarter - Before You Buy</title>
-
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-
-        @fonts
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @include('partials.head', [
+            'title' => 'Shop smarter',
+            'description' => 'Keep track of what you and the people you care about already own before buying something twice.',
+        ])
     </head>
     <body class="min-h-screen bg-zinc-50 font-sans text-zinc-950 antialiased selection:bg-orange-500 selection:text-zinc-950">
         <div class="relative isolate min-h-screen overflow-hidden">
