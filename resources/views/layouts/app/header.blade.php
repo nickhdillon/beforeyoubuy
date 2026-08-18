@@ -96,7 +96,7 @@
                             x-on:click="mobileNavigationOpen = false"
                             wire:navigate
                         >
-                            <flux:icon.layout-grid class="size-5 text-emerald-700" />
+                            <flux:icon.bookmark-square class="size-5 text-emerald-700" />
                             Collections
                         </a>
 
