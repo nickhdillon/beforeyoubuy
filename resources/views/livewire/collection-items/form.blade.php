@@ -38,8 +38,7 @@
                             x-ref="replacementImage"
                             type="file"
                             wire:model="image"
-                            accept="image/jpeg,image/png,image/webp"
-                            capture="environment"
+                            accept="image/jpeg,image/png,image/webp,heic"
                             class="sr-only"
                             tabindex="-1"
                         />
@@ -68,7 +67,7 @@
                 <flux:field>
                     <flux:label>Photo</flux:label>
 
-                    <flux:input type="file" wire:model="image" accept="image/jpeg,image/png,image/webp" capture="environment" required />
+                    <flux:input type="file" wire:model="image" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" required />
 
                     <flux:error name="image" />
                 </flux:field>

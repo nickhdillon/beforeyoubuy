@@ -87,7 +87,7 @@ class Form extends Component
     public function save(): void
     {
         $validated = $this->validate([
-            'image' => [! $this->item || $this->removeImage || ! $this->item->image_path ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+            'image' => [! $this->item || $this->removeImage || ! $this->item->image_path ? 'required' : 'nullable', 'image', 'mimes:jpg,jpeg,png,webp,heic,heif', 'max:8192'],
             'name' => ['nullable', 'string', 'max:120'],
             'url' => ['nullable', 'url:http,https', 'max:2048'],
             'notes' => ['nullable', 'string', 'max:2000'],
