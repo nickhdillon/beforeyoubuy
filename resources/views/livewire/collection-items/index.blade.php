@@ -8,13 +8,12 @@
             </span>
         </div>
 
-        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <flux:input
-                class="w-full sm:max-w-xl"
+                class="w-full sm:w-[375px]"
                 wire:model.live.debounce.300ms="search"
                 icon="magnifying-glass"
                 clearable
-                label="Search collection items"
                 placeholder="Search names, notes, links, or tags…"
             />
 

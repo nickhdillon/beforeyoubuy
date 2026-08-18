@@ -27,6 +27,40 @@ test('a user can create a collection with its private wishlist', function () {
         ->and($collection->wishlist)->not->toBeNull();
 });
 
+test('a user cannot create collections with duplicate names', function () {
+    $user = User::factory()->create();
+
+    Collection::factory()->for($user)->create(['name' => 'Espresso Setup']);
+
+    $this->actingAs($user);
+
+    Livewire::test(Form::class)
+        ->set('name', 'Espresso Setup')
+        ->call('save')
+        ->assertHasErrors(['name' => 'unique'])
+        ->assertNotDispatched('collection-created');
+
+    expect(Collection::query()->count())->toBe(1);
+});
+
+test('different users can use the same collection name', function () {
+    Collection::factory()->create(['name' => 'Espresso Setup']);
+    $user = User::factory()->create();
+
+    $this->actingAs($user);
+
+    Livewire::test(Form::class)
+        ->set('name', 'Espresso Setup')
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertDispatched('collection-created');
+
+    expect(Collection::query()->orderBy('id')->pluck('slug')->all())->toBe([
+        'espresso-setup',
+        'espresso-setup',
+    ]);
+});
+
 test('collection fields are validated', function (string $property, mixed $value, string $rule) {
     $this->actingAs(User::factory()->create());
 

@@ -5,6 +5,7 @@ use App\Models\CollectionItem;
 use App\Models\User;
 use App\Models\Wishlist;
 use Database\Seeders\DatabaseSeeder;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 test('a collection belongs to a user and has one wishlist', function () {
     $user = User::factory()->create();
@@ -17,6 +18,14 @@ test('a collection belongs to a user and has one wishlist', function () {
         ->and($collection->getRouteKeyName())->toBe('slug');
 });
 
+test('user slugs are generated from names and remain globally unique', function () {
+    $firstUser = User::factory()->create(['name' => 'Nick Dillon']);
+    $secondUser = User::factory()->create(['name' => 'Nick Dillon']);
+
+    expect($firstUser->slug)->toBe('nick-dillon')
+        ->and($secondUser->slug)->toBe('nick-dillon-2');
+});
+
 test('collection slugs stay unique and update with their names', function () {
     $firstCollection = Collection::factory()->create(['name' => 'Coffee Gear']);
     $secondCollection = Collection::factory()->create(['name' => 'Coffee Gear 2']);
@@ -27,6 +36,16 @@ test('collection slugs stay unique and update with their names', function () {
     $firstCollection->update(['name' => 'Daily Setup']);
 
     expect($firstCollection->fresh()->slug)->toBe('daily-setup');
+});
+
+test('collection names are unique per user at the database level', function () {
+    $user = User::factory()->create();
+
+    Collection::factory()->for($user)->create(['name' => 'Coffee Gear']);
+    Collection::factory()->create(['name' => 'Coffee Gear']);
+
+    expect(fn () => Collection::factory()->for($user)->create(['name' => 'Coffee Gear']))
+        ->toThrow(UniqueConstraintViolationException::class);
 });
 
 test('a collection last updated timestamp includes its latest item update', function () {

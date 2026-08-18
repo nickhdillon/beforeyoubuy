@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 /**
  * @property int $id
  * @property string $name
+ * @property string $slug
  * @property string $email
  * @property Carbon|null $email_verified_at
  * @property string $password
@@ -44,6 +45,11 @@ class User extends Authenticatable
         return $this->hasMany(Tag::class)->orderBy('name');
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -67,5 +73,38 @@ class User extends Authenticatable
         return Str::length($initials) > 1
             ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
             : $initials;
+    }
+
+    public static function booted(): void
+    {
+        static::creating(function (self $user): void {
+            $user->slug = self::uniqueSlugFor($user);
+        });
+
+        static::updating(function (self $user): void {
+            if ($user->isDirty('name')) {
+                $user->slug = self::uniqueSlugFor($user);
+            }
+        });
+    }
+
+    private static function uniqueSlugFor(self $user): string
+    {
+        $baseSlug = Str::slug($user->name) ?: 'user';
+        $slug = $baseSlug;
+        $suffix = 2;
+
+        while (self::query()
+            ->where('slug', $slug)
+            ->when(
+                $user->exists,
+                fn ($query) => $query->where($user->getKeyName(), '!=', $user->getKey()),
+            )
+            ->exists()) {
+            $slug = $baseSlug.'-'.$suffix;
+            $suffix++;
+        }
+
+        return $slug;
     }
 }

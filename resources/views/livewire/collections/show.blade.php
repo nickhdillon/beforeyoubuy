@@ -39,7 +39,7 @@
                                     tooltip="Copy public link"
                                     aria-label="Copy public link"
                                     x-on:click="
-                                        navigator.clipboard.writeText(@js(route('collections.show', $collection))).then(() => {
+                                        navigator.clipboard.writeText(@js(route('collections.public', ['user' => $collection->user, 'collection' => $collection]))).then(() => {
                                             copied = true
                                             clearTimeout(resetTimer)
                                             resetTimer = setTimeout(() => copied = false, 2000)

@@ -92,7 +92,7 @@ class Collection extends Model
     public static function booted(): void
     {
         static::creating(function (self $collection): void {
-            $collection->slug = Str::slug($collection->name);
+            $collection->slug = self::uniqueSlugFor($collection);
         });
 
         static::created(function (self $collection): void {
@@ -101,8 +101,29 @@ class Collection extends Model
 
         static::updating(function (self $collection): void {
             if ($collection->isDirty('name')) {
-                $collection->slug = Str::slug($collection->name);
+                $collection->slug = self::uniqueSlugFor($collection);
             }
         });
+    }
+
+    private static function uniqueSlugFor(self $collection): string
+    {
+        $baseSlug = Str::slug($collection->name) ?: 'collection';
+        $slug = $baseSlug;
+        $suffix = 2;
+
+        while (self::query()
+            ->where('user_id', $collection->user_id)
+            ->where('slug', $slug)
+            ->when(
+                $collection->exists,
+                fn (Builder $query): Builder => $query->where($collection->getKeyName(), '!=', $collection->getKey()),
+            )
+            ->exists()) {
+            $slug = $baseSlug.'-'.$suffix;
+            $suffix++;
+        }
+
+        return $slug;
     }
 }

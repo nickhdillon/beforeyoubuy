@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Collections;
 
 use App\Models\Collection;
+use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
@@ -18,6 +19,8 @@ use Livewire\Component;
 #[Title('Collection')]
 class Show extends Component
 {
+    public ?User $user = null;
+
     public Collection $collection;
 
     public function mount(): void

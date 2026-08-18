@@ -51,6 +51,24 @@ test('a collection name is still required when editing', function () {
         ->assertHasErrors(['name' => 'required']);
 });
 
+test('a collection cannot be renamed to another collection name owned by the user', function () {
+    $user = User::factory()->create();
+    Collection::factory()->for($user)->create(['name' => 'Coffee Gear']);
+    $collection = Collection::factory()->for($user)->create(['name' => 'Tea Gear']);
+
+    $this->actingAs($user);
+
+    Livewire::test(Form::class, ['collection' => $collection])
+        ->set('name', 'Coffee Gear')
+        ->call('save')
+        ->assertHasErrors(['name' => 'unique'])
+        ->assertNotDispatched('collection-updated');
+
+    expect($collection->refresh())
+        ->name->toBe('Tea Gear')
+        ->slug->toBe('tea-gear');
+});
+
 test('another user cannot open the collection editor', function () {
     $collection = Collection::factory()->create();
 

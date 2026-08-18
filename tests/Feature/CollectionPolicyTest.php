@@ -5,6 +5,7 @@ use App\Models\CollectionItem;
 use App\Models\User;
 use App\Policies\CollectionPolicy;
 use App\Policies\WishlistPolicy;
+use Illuminate\Http\Request;
 
 test('public collections can be viewed by anyone while private collections are owner only', function () {
     $owner = User::factory()->create();
@@ -54,7 +55,7 @@ test('a public collection page is available to guests without exposing its wishl
         'updated_at' => '2026-07-25 12:00:00',
     ]);
 
-    $this->get(route('collections.show', $collection))
+    $this->get(route('collections.public', ['user' => $owner, 'collection' => $collection]))
         ->assertOk()
         ->assertSee('Shared Coffee Gear')
         ->assertSee('Collection by')
@@ -62,6 +63,63 @@ test('a public collection page is available to guests without exposing its wishl
         ->assertSee('Updated 2 days ago')
         ->assertSee('datetime="2026-07-25T12:00:00', false)
         ->assertDontSee('Add wishlist item');
+});
+
+test('collection routes are scoped to their owner', function () {
+    $firstOwner = User::factory()->create(['name' => 'First Owner']);
+    $secondOwner = User::factory()->create(['name' => 'Second Owner']);
+    $firstCollection = Collection::factory()->for($firstOwner)->public()->create([
+        'name' => 'Coffee Gear',
+        'description' => 'First owner collection',
+    ]);
+    $secondCollection = Collection::factory()->for($secondOwner)->public()->create([
+        'name' => 'Coffee Gear',
+        'description' => 'Second owner collection',
+    ]);
+    $secondOnlyCollection = Collection::factory()->for($secondOwner)->public()->create([
+        'name' => 'Tea Gear',
+    ]);
+
+    expect($firstCollection->slug)->toBe('coffee-gear')
+        ->and($secondCollection->slug)->toBe('coffee-gear')
+        ->and(route('collections.show', $firstCollection))->toEndWith('/collections/coffee-gear')
+        ->and(route('collections.show', $firstCollection))->not->toContain('first-owner')
+        ->and(route('collections.public', ['user' => $firstOwner, 'collection' => $firstCollection]))
+        ->toEndWith('/first-owner/collections/coffee-gear');
+
+    $this->get(route('collections.show', $firstCollection))
+        ->assertRedirect(route('login'));
+
+    $this->get(route('collections.public', ['user' => $firstOwner, 'collection' => $firstCollection]))
+        ->assertOk()
+        ->assertSee('First owner collection')
+        ->assertDontSee('Second owner collection');
+
+    $this->get(route('collections.public', ['user' => $secondOwner, 'collection' => $secondCollection]))
+        ->assertOk()
+        ->assertSee('Second owner collection')
+        ->assertDontSee('First owner collection');
+
+    $this->get(route('collections.public', ['user' => $firstOwner, 'collection' => $secondOnlyCollection]))
+        ->assertNotFound();
+});
+
+test('public collection binding uses the route owner during Livewire updates', function () {
+    $owner = User::factory()->create(['name' => 'Collection Owner']);
+    $viewer = User::factory()->create(['name' => 'Signed In Viewer']);
+    $collection = Collection::factory()->for($owner)->public()->create(['name' => 'Shared Gear']);
+    $request = Request::create(
+        route('collections.public', ['user' => $owner, 'collection' => $collection]),
+    );
+    $route = app('router')->getRoutes()->match($request);
+
+    $this->actingAs($viewer);
+
+    $route->bind($request);
+    app('router')->substituteBindings($route);
+
+    expect($route->parameter('user')->is($owner))->toBeTrue()
+        ->and($route->parameter('collection')->is($collection))->toBeTrue();
 });
 
 test('an owner can copy the public collection link', function () {
@@ -75,6 +133,7 @@ test('an owner can copy the public collection link', function () {
         ->assertSee('aria-label="Copy public link"', false)
         ->assertSee('Copied to clipboard')
         ->assertSee('navigator.clipboard.writeText', false)
+        ->assertSee($owner->slug, false)
         ->assertSee($publicCollection->slug, false);
 
     $this->get(route('collections.show', $privateCollection))
@@ -88,7 +147,7 @@ test('an owner can copy the public collection link', function () {
 test('public link controls are hidden from guests', function () {
     $collection = Collection::factory()->public()->create();
 
-    $this->get(route('collections.show', $collection))
+    $this->get(route('collections.public', ['user' => $collection->user, 'collection' => $collection]))
         ->assertOk()
         ->assertDontSee('aria-label="Copy public link"', false)
         ->assertDontSee('Copied to clipboard')
@@ -98,10 +157,12 @@ test('public link controls are hidden from guests', function () {
 test('a private collection page is unavailable to guests and other users', function () {
     $collection = Collection::factory()->create();
 
-    $this->get(route('collections.show', $collection))->assertNotFound();
+    $url = route('collections.public', ['user' => $collection->user, 'collection' => $collection]);
+
+    $this->get($url)->assertNotFound();
 
     $this->actingAs(User::factory()->create())
-        ->get(route('collections.show', $collection))
+        ->get($url)
         ->assertNotFound();
 });
 
@@ -119,7 +180,7 @@ test('only an owner sees collection item actions', function () {
 
     auth()->logout();
 
-    $this->get(route('collections.show', $collection))
+    $this->get(route('collections.public', ['user' => $owner, 'collection' => $collection]))
         ->assertOk()
         ->assertDontSee('aria-label="Edit Coffee grinder"', false)
         ->assertDontSee('aria-label="Actions for Coffee grinder"', false)

@@ -9,21 +9,35 @@ use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
-use Livewire\Attributes\Validate;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class Form extends Component
 {
     public ?Collection $collection = null;
 
-    #[Validate(['required', 'string', 'max:120'])]
     public string $name = '';
 
-    #[Validate(['nullable', 'string', 'max:2000'])]
     public string $description = '';
 
-    #[Validate(['boolean'])]
     public bool $is_public = false;
+
+    /** @return array<string, list<mixed>> */
+    protected function rules(): array
+    {
+        $uniqueName = Rule::unique(Collection::class)
+            ->where('user_id', auth()->id());
+
+        if ($this->collection) {
+            $uniqueName->ignore($this->collection);
+        }
+
+        return [
+            'name' => ['required', 'string', 'max:120', $uniqueName],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'is_public' => ['boolean'],
+        ];
+    }
 
     public function mount(): void
     {

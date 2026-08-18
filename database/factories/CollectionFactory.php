@@ -20,7 +20,7 @@ class CollectionFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'name' => fake()->randomElement(['Coffee gear', 'Vinyl records', 'Favorite cookbooks', 'Film cameras']),
+            'name' => fake()->unique()->words(3, true),
             'description' => fake()->optional()->sentence(12),
             'is_public' => false,
         ];

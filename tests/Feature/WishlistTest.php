@@ -52,12 +52,12 @@ test('wishlist items are owner only even when their collection is public', funct
         ->assertSee('Your wishlist is visible only to you');
 
     $this->actingAs($otherUser)
-        ->get(route('collections.show', $collection))
+        ->get(route('collections.public', ['user' => $owner, 'collection' => $collection]))
         ->assertOk()
         ->assertDontSee('Secret grinder')
         ->assertDontSee('Add wishlist item');
 
-    $this->get(route('collections.show', $collection))
+    $this->get(route('collections.public', ['user' => $owner, 'collection' => $collection]))
         ->assertOk()
         ->assertDontSee('Secret grinder')
         ->assertDontSee('Add wishlist item');

@@ -24,13 +24,12 @@
             <span class="hard-shadow border-2 border-zinc-950 bg-white px-3 py-1 text-xs font-black">{{ $this->collections->count() }} {{ str('collection')->plural($this->collections->count()) }}</span>
         </div>
 
-        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <flux:input
-                class="w-full sm:max-w-xl"
+                class="w-full sm:w-[375px]"
                 wire:model.live.debounce.300ms="search"
                 icon="magnifying-glass"
                 clearable
-                label="Search collections"
                 placeholder="Search names, descriptions, items, or tags…"
             />
 

@@ -21,13 +21,12 @@
                 Keep track of what you might buy next. Your wishlist is visible only to you, even when this collection is public.
             </p>
 
-            <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <flux:input
-                    class="w-full sm:max-w-xl"
+                    class="w-full sm:w-[375px]"
                     wire:model.live.debounce.300ms="search"
                     icon="magnifying-glass"
                     clearable
-                    label="Search wishlist items"
                     placeholder="Search names, notes, links, or tags…"
                 />
 
