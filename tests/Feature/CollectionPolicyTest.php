@@ -65,6 +65,23 @@ test('a public collection page is available to guests without exposing its wishl
         ->assertDontSee('Add wishlist item');
 });
 
+test('a public collection page includes its name and owner in link preview metadata', function () {
+    $owner = User::factory()->create(['name' => 'Taylor & Reed']);
+    $collection = Collection::factory()->for($owner)->public()->create([
+        'name' => 'Coffee & Espresso',
+        'description' => 'Our favorite brewing gear.',
+    ]);
+
+    $pageTitle = 'Coffee &amp; Espresso by Taylor &amp; Reed - Before You Buy';
+
+    $this->get(route('collections.public', ['user' => $owner, 'collection' => $collection]))
+        ->assertOk()
+        ->assertSee('<title>'.$pageTitle.'</title>', false)
+        ->assertSee('<meta property="og:title" content="'.$pageTitle.'">', false)
+        ->assertSee('<meta property="og:description" content="Our favorite brewing gear.">', false)
+        ->assertSee('<meta name="twitter:title" content="'.$pageTitle.'">', false);
+});
+
 test('collection routes are scoped to their owner', function () {
     $firstOwner = User::factory()->create(['name' => 'First Owner']);
     $secondOwner = User::factory()->create(['name' => 'Second Owner']);

@@ -8,15 +8,14 @@ use App\Models\Collection;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
 /** @property-read Carbon $lastUpdatedAt */
 #[Layout('layouts.public')]
-#[Title('Collection')]
 class Show extends Component
 {
     public ?User $user = null;
@@ -31,6 +30,19 @@ class Show extends Component
         if (Gate::allows('update', $this->collection)) {
             $this->collection->load('wishlist');
         }
+    }
+
+    public function render(): View
+    {
+        $ownerName = $this->collection->user->name;
+
+        return view('livewire.collections.show')
+            ->layoutData([
+                'title' => "{$this->collection->name} by {$ownerName}",
+                'description' => filled($this->collection->description)
+                    ? $this->collection->description
+                    : "View {$this->collection->name}, a collection by {$ownerName}.",
+            ]);
     }
 
     #[Computed]
