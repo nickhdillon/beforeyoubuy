@@ -1,8 +1,10 @@
 <?php
 
 use App\Livewire\CollectionItems\Form;
+use App\Livewire\CollectionItems\Index;
 use App\Models\Collection;
 use App\Models\CollectionItem;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -90,24 +92,53 @@ test('an owner can create items back to back', function () {
     Storage::fake('public');
     $user = User::factory()->create();
     $collection = Collection::factory()->for($user)->create();
+    $tag = Tag::factory()->for($user)->create();
 
     $this->actingAs($user);
 
     Livewire::test(Form::class, ['collection' => $collection])
+        ->assertSeeHtml('wire:model.live="createAnother"')
         ->set('createAnother', true)
+        ->set('tagIds', [$tag->id])
         ->set('image', UploadedFile::fake()->image('grinder.jpg'))
         ->set('name', 'Hand grinder')
         ->call('save')
         ->assertHasNoErrors()
+        ->assertNotDispatched('collection-item-created')
+        ->assertNotDispatched('modal-close')
         ->assertSet('createAnother', true)
+        ->assertSet('tagIds', [$tag->id])
+        ->assertSet('hasCreatedItemsAwaitingRefresh', true)
         ->assertSet('image', null)
         ->assertSet('name', '')
         ->set('image', UploadedFile::fake()->image('kettle.jpg'))
         ->set('name', 'Kettle')
         ->call('save')
-        ->assertHasNoErrors();
+        ->assertHasNoErrors()
+        ->assertSet('tagIds', [$tag->id])
+        ->call('resetForm')
+        ->assertDispatched('collection-item-created');
 
-    expect($collection->items()->pluck('name')->all())->toBe(['Hand grinder', 'Kettle']);
+    expect($collection->items()->pluck('name')->all())->toBe(['Hand grinder', 'Kettle'])
+        ->and($collection->items()->with('tags')->get()->every(fn (CollectionItem $item): bool => $item->tags->contains($tag)))->toBeTrue();
+});
+
+test('collection items use the compact uncropped mobile card layout without fallback names', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+    $collection = Collection::factory()->for($user)->create();
+    CollectionItem::factory()->for($collection)->create([
+        'name' => null,
+        'image_path' => 'collection-items/portrait.jpg',
+    ]);
+
+    Livewire::actingAs($user)
+        ->test(Index::class, ['collection' => $collection])
+        ->assertSeeHtml('grid grid-cols-2 gap-5 lg:grid-cols-3')
+        ->assertSeeHtml('hard-shadow m-3 mb-0 overflow-hidden border-2 border-zinc-950 bg-emerald-50')
+        ->assertSeeHtml('class="aspect-square w-full object-cover transition duration-300 group-hover:saturate-110"')
+        ->assertDontSee('Untitled item')
+        ->assertDontSee('untitled item');
 });
 
 test('ratings must use half-star increments', function () {

@@ -21,6 +21,7 @@ test('collection items can have multiple tags', function () {
     Livewire::actingAs($user)
         ->test(CollectionItemForm::class, ['collection' => $collection])
         ->assertSee('Choose tags…')
+        ->assertSeeHtml('class="text-xs font-black text-emerald-700 hover:text-emerald-900">Add tag</button>')
         ->set('image', UploadedFile::fake()->image('item.jpg'))
         ->set('name', 'Kettle')
         ->set('tagIds', $tags->modelKeys())
@@ -50,6 +51,61 @@ test('wishlist item tags can be updated', function () {
         ->assertHasNoErrors();
 
     expect($item->tags()->pluck('tags.id')->all())->toBe([$tags->last()->id]);
+});
+
+test('a tag can be created and selected without resetting the collection item form', function () {
+    $user = User::factory()->create();
+    $collection = Collection::factory()->for($user)->create();
+
+    Livewire::actingAs($user)
+        ->test(CollectionItemForm::class, ['collection' => $collection])
+        ->assertSee('Create tag')
+        ->set('name', 'Travel kettle')
+        ->set('quantity', 2)
+        ->set('tagForm.name', '  Travel   gear  ')
+        ->call('createTag')
+        ->assertHasNoErrors()
+        ->assertSet('name', 'Travel kettle')
+        ->assertSet('quantity', 2)
+        ->assertSet('tagForm.name', '')
+        ->assertSet('tagIds', [$user->tags()->sole()->id])
+        ->assertSee('Travel gear');
+
+    expect($user->tags()->sole()->name)->toBe('Travel gear');
+});
+
+test('a tag can be created and selected without resetting the wishlist item form', function () {
+    $user = User::factory()->create();
+    $collection = Collection::factory()->for($user)->create();
+
+    Livewire::actingAs($user)
+        ->test(WishlistItemForm::class, ['collection' => $collection])
+        ->assertSee('Create tag')
+        ->set('name', 'Camera')
+        ->set('url', 'https://example.com/camera')
+        ->set('tagForm.name', 'Photography')
+        ->call('createTag')
+        ->assertHasNoErrors()
+        ->assertSet('name', 'Camera')
+        ->assertSet('url', 'https://example.com/camera')
+        ->assertSet('tagForm.name', '')
+        ->assertSet('tagIds', [$user->tags()->sole()->id])
+        ->assertSee('Photography');
+});
+
+test('inline tag names must be unique for the collection owner', function () {
+    $user = User::factory()->create();
+    $collection = Collection::factory()->for($user)->create();
+    Tag::factory()->for($user)->create(['name' => 'Favorite']);
+
+    Livewire::actingAs($user)
+        ->test(CollectionItemForm::class, ['collection' => $collection])
+        ->set('name', 'Preserved item name')
+        ->set('tagForm.name', 'Favorite')
+        ->call('createTag')
+        ->assertHasErrors(['tagForm.name' => 'unique'])
+        ->assertSet('name', 'Preserved item name')
+        ->assertSet('tagIds', []);
 });
 
 test('an item cannot use another users tag', function () {

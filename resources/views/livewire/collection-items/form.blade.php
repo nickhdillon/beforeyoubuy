@@ -84,12 +84,16 @@
             <div class="grid gap-3">
                 <div class="flex items-center justify-between gap-3">
                     <flux:label>Tags (optional)</flux:label>
-                    <a href="{{ route('tags.edit') }}" class="text-xs font-black text-emerald-700 hover:text-emerald-900" wire:navigate>Manage tags</a>
+                    <div class="flex items-center gap-3">
+                        <flux:modal.trigger name="create-collection-item-tag">
+                            <button type="button" class="text-xs font-black text-emerald-700 hover:text-emerald-900">Add tag</button>
+                        </flux:modal.trigger>
+
+                        <a href="{{ route('tags.edit') }}" class="text-xs font-black text-emerald-700 hover:text-emerald-900" wire:navigate>Manage tags</a>
+                    </div>
                 </div>
 
-                @if ($this->availableTags->isEmpty())
-                    <p class="border-2 border-dashed border-emerald-300 bg-emerald-50 p-3 text-sm font-medium text-zinc-600">Create tags in settings, then use them to organize your items.</p>
-                @else
+                @if ($this->availableTags->isNotEmpty())
                     <flux:select
                         wire:model.live="tagIds"
                         variant="listbox"
@@ -133,6 +137,7 @@
                         </div>
                     @endif
                 @endif
+
                 <flux:error name="tagIds.*" />
             </div>
 
@@ -141,7 +146,7 @@
             @unless ($item)
                 <div class="border-2 border-dashed border-emerald-300 bg-emerald-50 p-4">
                     <flux:checkbox
-                        wire:model="createAnother"
+                        wire:model.live="createAnother"
                         label="Create another after this"
                         description="Save this item, clear the form, and stay here for the next photo."
                     />
@@ -170,6 +175,8 @@
             </div>
         </form>
     </flux:modal>
+
+    <x-create-tag-modal name="create-collection-item-tag" />
 
     @if ($item)
         <flux:modal name="delete-collection-item" class="max-w-md">

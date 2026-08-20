@@ -2,6 +2,7 @@
 
 namespace App\Livewire\WishlistItems;
 
+use App\Livewire\Forms\CreateTagForm;
 use App\Models\Collection;
 use App\Models\Tag;
 use App\Models\Wishlist;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -43,13 +45,18 @@ class Form extends Component
 
     public bool $removeImage = false;
 
+    #[Locked]
+    public bool $hasCreatedItemsAwaitingRefresh = false;
+
     /** @var array<int, int|string> */
     public array $tagIds = [];
+
+    public CreateTagForm $tagForm;
 
     #[Computed]
     public function availableTags(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->collection->user->tags;
+        return $this->collection->user->tags()->get();
     }
 
     public function mount(Collection $collection, ?Wishlist $wishlist = null): void
@@ -106,6 +113,19 @@ class Form extends Component
         $this->createItem($validated);
     }
 
+    public function createTag(): void
+    {
+        Gate::authorize('update', $this->collection);
+
+        $tag = $this->tagForm->create($this->collection->user);
+
+        $this->tagIds = array_values(array_unique([...$this->tagIds, $tag->id]));
+        unset($this->availableTags);
+
+        Flux::modal('create-wishlist-item-tag')->close();
+        Flux::toast(variant: 'success', text: 'Tag created and selected.');
+    }
+
     public function delete(): void
     {
         $item = $this->item;
@@ -132,8 +152,15 @@ class Form extends Component
 
     public function resetForm(): void
     {
-        $this->reset(['item', 'image', 'name', 'url', 'notes', 'quantity', 'rating', 'removeImage', 'tagIds']);
+        $shouldRefreshItems = $this->hasCreatedItemsAwaitingRefresh;
+
+        $this->reset(['item', 'image', 'name', 'url', 'notes', 'quantity', 'rating', 'createAnother', 'removeImage', 'tagIds', 'hasCreatedItemsAwaitingRefresh']);
+        $this->tagForm->reset();
         $this->resetValidation();
+
+        if ($shouldRefreshItems) {
+            $this->dispatch('wishlist-item-created');
+        }
     }
 
     public function removePhoto(): void
@@ -178,14 +205,18 @@ class Form extends Component
 
         $item->tags()->sync($validated['tagIds']);
 
-        $this->reset(['image', 'name', 'url', 'quantity', 'notes', 'rating', 'tagIds']);
-        $this->dispatch('wishlist-item-created');
+        $this->reset(['image', 'name', 'url', 'quantity', 'notes', 'rating', 'removeImage']);
+        $this->resetValidation();
 
         if ($this->createAnother) {
+            $this->hasCreatedItemsAwaitingRefresh = true;
             Flux::toast(variant: 'success', text: 'Item added. Add another when you’re ready.');
 
             return;
         }
+
+        $this->reset('tagIds', 'hasCreatedItemsAwaitingRefresh');
+        $this->dispatch('wishlist-item-created');
 
         Flux::modal('wishlist-item-form')->close();
         Flux::toast(variant: 'success', text: 'Added to wishlist.');

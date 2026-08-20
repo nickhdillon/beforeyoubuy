@@ -101,7 +101,7 @@
                 </div>
             </div>
         @else
-            <div class="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="mt-5 grid grid-cols-2 gap-5 lg:grid-cols-3">
                 @foreach ($this->items as $item)
                     <article wire:key="collection-item-{{ $item->id }}" class="hard-shadow hard-shadow-hover group relative flex min-w-0 flex-col border-2 border-zinc-950 bg-white transition hover:-translate-y-0.5">
                         @can('update', $item)
@@ -109,7 +109,7 @@
                                 type="button"
                                 class="absolute inset-0 z-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700"
                                 x-on:click="$dispatch('edit-collection-item', { itemId: {{ $item->id }} })"
-                                aria-label="Edit {{ $item->name ?: 'untitled item' }}"
+                                aria-label="Edit {{ $item->name ?: 'item' }}"
                             ></button>
 
                             <div class="absolute top-3 end-3 z-20">
@@ -119,7 +119,7 @@
                                         size="sm"
                                         variant="secondary"
                                         icon="ellipsis-horizontal"
-                                        aria-label="Actions for {{ $item->name ?: 'untitled item' }}"
+                                        aria-label="Actions for {{ $item->name ?: 'item' }}"
                                         class="hard-shadow px-4!"
                                     />
 
@@ -159,33 +159,37 @@
                             </span>
                         @endif
 
-                        <div class="grid aspect-4/3 place-items-center overflow-hidden border-b-2 border-zinc-950 bg-emerald-50">
+                        <div class="hard-shadow m-3 mb-0 overflow-hidden border-2 border-zinc-950 bg-emerald-50">
                             <img
                                 src="{{ Storage::disk('public')->url($item->image_path) }}"
                                 alt="{{ $item->name ?: 'Collection item' }}"
-                                class="block size-full object-cover object-center transition duration-300 group-hover:scale-[1.02] group-hover:saturate-110"
+                                class="aspect-square w-full object-cover transition duration-300 group-hover:saturate-110"
                             />
                         </div>
 
                         <div class="flex min-w-0 flex-1 flex-col p-4">
-                            <div class="flex min-w-0 items-center justify-between gap-3">
-                                <h3 class="min-w-0 truncate text-lg leading-tight font-black tracking-tight">
-                                    {{ $item->name ?: 'Untitled item' }}
-                                </h3>
+                            @if ($item->name || $item->rating)
+                                <div class="flex min-w-0 items-center justify-between gap-3">
+                                    @if ($item->name)
+                                        <h3 class="min-w-0 truncate text-lg leading-tight font-black tracking-tight">
+                                            {{ $item->name }}
+                                        </h3>
+                                    @endif
 
-                                @if ($item->rating)
-                                    <div
-                                        class="flex shrink-0 items-center gap-1.5 text-xs font-black text-zinc-700"
-                                        aria-label="Rated {{ $item->rating }} out of 5"
-                                    >
-                                        <span class="text-orange-600" aria-hidden="true">★</span>
-                                        <span>
-                                            {{ (float) $item->rating === (float) (int) $item->rating ? Number::format($item->rating) : Number::format($item->rating, 1) }}
-                                        </span>
-                                        <span class="font-bold text-zinc-400">/ 5</span>
-                                    </div>
-                                @endif
-                            </div>
+                                    @if ($item->rating)
+                                        <div
+                                            class="flex shrink-0 items-center gap-1.5 text-xs font-black text-zinc-700"
+                                            aria-label="Rated {{ $item->rating }} out of 5"
+                                        >
+                                            <span class="text-orange-600" aria-hidden="true">★</span>
+                                            <span>
+                                                {{ (float) $item->rating === (float) (int) $item->rating ? Number::format($item->rating) : Number::format($item->rating, 1) }}
+                                            </span>
+                                            <span class="font-bold text-zinc-400">/ 5</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
 
                             @if ($item->tags->isNotEmpty())
                                 <div class="mt-3 flex flex-wrap gap-1.5">

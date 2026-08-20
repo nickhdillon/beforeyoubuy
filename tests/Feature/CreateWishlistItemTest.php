@@ -2,6 +2,7 @@
 
 use App\Livewire\WishlistItems\Form;
 use App\Models\Collection;
+use App\Models\Tag;
 use App\Models\User;
 use App\Models\WishlistItem;
 use Illuminate\Http\UploadedFile;
@@ -66,6 +67,30 @@ test('a wishlist item photo is required', function () {
     Livewire::test(Form::class, ['collection' => $collection])
         ->call('save')
         ->assertHasErrors(['image' => 'required']);
+});
+
+test('an owner can keep the wishlist form open to create another item', function () {
+    Storage::fake('public');
+    $user = User::factory()->create();
+    $collection = Collection::factory()->for($user)->create();
+    $tag = Tag::factory()->for($user)->create();
+
+    Livewire::actingAs($user)
+        ->test(Form::class, ['collection' => $collection])
+        ->assertSeeHtml('wire:model.live="createAnother"')
+        ->set('createAnother', true)
+        ->set('tagIds', [$tag->id])
+        ->set('image', UploadedFile::fake()->image('grinder.jpg'))
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertNotDispatched('wishlist-item-created')
+        ->assertNotDispatched('modal-close')
+        ->assertSet('createAnother', true)
+        ->assertSet('tagIds', [$tag->id])
+        ->assertSet('hasCreatedItemsAwaitingRefresh', true)
+        ->assertSet('image', null)
+        ->call('resetForm')
+        ->assertDispatched('wishlist-item-created');
 });
 
 test('another user cannot mount the wishlist form', function () {
