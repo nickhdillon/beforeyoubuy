@@ -104,51 +104,61 @@
             <div class="mt-5 grid grid-cols-2 gap-5 lg:grid-cols-3">
                 @foreach ($this->items as $item)
                     <article wire:key="collection-item-{{ $item->id }}" class="hard-shadow hard-shadow-hover group relative flex min-w-0 flex-col border-2 border-zinc-950 bg-white transition hover:-translate-y-0.5">
-                        @can('update', $item)
-                            <button
-                                type="button"
-                                class="absolute inset-0 z-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700"
-                                x-on:click="$dispatch('edit-collection-item', { itemId: {{ $item->id }} })"
-                                aria-label="Edit {{ $item->name ?: 'item' }}"
-                            ></button>
+                        @if ($publicView)
+                            <flux:modal.trigger :name="'collection-item-image-'.$item->id">
+                                <button
+                                    type="button"
+                                    class="absolute inset-0 z-10 cursor-zoom-in focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700"
+                                    aria-label="View larger image of {{ $item->name ?: 'collection item' }}"
+                                ></button>
+                            </flux:modal.trigger>
+                        @else
+                            @can('update', $item)
+                                <button
+                                    type="button"
+                                    class="absolute inset-0 z-10 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700"
+                                    x-on:click="$dispatch('edit-collection-item', { itemId: {{ $item->id }} })"
+                                    aria-label="Edit {{ $item->name ?: 'item' }}"
+                                ></button>
 
-                            <div class="absolute top-3 end-3 z-20">
-                                <flux:dropdown position="bottom" align="end">
-                                    <flux:button
-                                        square
-                                        size="sm"
-                                        variant="secondary"
-                                        icon="ellipsis-horizontal"
-                                        aria-label="Actions for {{ $item->name ?: 'item' }}"
-                                        class="hard-shadow px-4!"
-                                    />
+                                <div class="absolute top-3 end-3 z-20">
+                                    <flux:dropdown position="bottom" align="end">
+                                        <flux:button
+                                            square
+                                            size="sm"
+                                            variant="secondary"
+                                            icon="ellipsis-horizontal"
+                                            aria-label="Actions for {{ $item->name ?: 'item' }}"
+                                            class="hard-shadow px-4!"
+                                        />
 
-                                    <flux:menu class="hard-shadow min-w-48 rounded-none! border-2! border-zinc-950! bg-white! p-1!">
-                                        <flux:menu.item
-                                            class="rounded-none! px-2.5! py-2! font-black! text-zinc-950! data-active:bg-orange-100/65!"
-                                            x-on:click="$dispatch('edit-collection-item', { itemId: {{ $item->id }} })"
-                                        >
-                                            Edit item
-                                        </flux:menu.item>
+                                        <flux:menu class="hard-shadow min-w-48 rounded-none! border-2! border-zinc-950! bg-white! p-1!">
+                                            <flux:menu.item
+                                                class="rounded-none! px-2.5! py-2! font-black! text-zinc-950! data-active:bg-orange-100/65!"
+                                                x-on:click="$dispatch('edit-collection-item', { itemId: {{ $item->id }} })"
+                                            >
+                                                Edit item
+                                            </flux:menu.item>
 
-                                        <flux:menu.item
-                                            class="rounded-none! px-2.5! py-2! font-black! text-zinc-950! data-active:bg-orange-100/65!"
-                                            wire:click="confirmMoveToWishlist({{ $item->id }})"
-                                        >
-                                            Move to wishlist
-                                        </flux:menu.item>
+                                            <flux:menu.item
+                                                class="rounded-none! px-2.5! py-2! font-black! text-zinc-950! data-active:bg-orange-100/65!"
+                                                wire:click="confirmMoveToWishlist({{ $item->id }})"
+                                            >
+                                                Move to wishlist
+                                            </flux:menu.item>
 
-                                        <flux:menu.item
-                                            variant="danger"
-                                            class="rounded-none! px-2.5! py-2! font-black! text-red-700! data-active:bg-orange-100/65!"
-                                            wire:click="confirmDelete({{ $item->id }})"
-                                        >
-                                            Delete item
-                                        </flux:menu.item>
-                                    </flux:menu>
-                                </flux:dropdown>
-                            </div>
-                        @endcan
+                                            <flux:menu.item
+                                                variant="danger"
+                                                class="rounded-none! px-2.5! py-2! font-black! text-red-700! data-active:bg-orange-100/65!"
+                                                wire:click="confirmDelete({{ $item->id }})"
+                                            >
+                                                Delete item
+                                            </flux:menu.item>
+                                        </flux:menu>
+                                    </flux:dropdown>
+                                </div>
+                            @endcan
+                        @endif
 
                         @if ($item->quantity > 1)
                             <span
@@ -219,6 +229,24 @@
                     </article>
                 @endforeach
             </div>
+
+            @if ($publicView)
+                @foreach ($this->items as $item)
+                    <flux:modal :name="'collection-item-image-'.$item->id" class="max-w-5xl">
+                        <div class="grid gap-4">
+                            @if ($item->name)
+                                <flux:heading size="lg" class="font-black!">{{ $item->name }}</flux:heading>
+                            @endif
+
+                            <img
+                                src="{{ Storage::disk('public')->url($item->image_path) }}"
+                                alt="{{ $item->name ?: 'Collection item' }}"
+                                class="max-h-[80vh] w-auto max-w-full justify-self-center object-contain"
+                            />
+                        </div>
+                    </flux:modal>
+                @endforeach
+            @endif
         @endif
     </section>
 

@@ -56,7 +56,7 @@ class Form extends Component
     #[Computed]
     public function availableTags(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->collection->user->tags()->get();
+        return $this->collection->user->tags;
     }
 
     public function mount(Collection $collection, ?Wishlist $wishlist = null): void
@@ -120,6 +120,10 @@ class Form extends Component
         $tag = $this->tagForm->create($this->collection->user);
 
         $this->tagIds = array_values(array_unique([...$this->tagIds, $tag->id]));
+        $this->collection->user->setRelation(
+            'tags',
+            $this->collection->user->tags->push($tag)->sortBy('name')->values(),
+        );
         unset($this->availableTags);
 
         Flux::modal('create-wishlist-item-tag')->close();

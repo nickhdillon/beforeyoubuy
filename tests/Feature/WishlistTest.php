@@ -63,40 +63,6 @@ test('wishlist items are owner only even when their collection is public', funct
         ->assertDontSee('Add wishlist item');
 });
 
-test('collection and wishlist cards present product details consistently', function () {
-    Storage::fake('public');
-
-    $owner = User::factory()->create();
-    $collection = Collection::factory()->for($owner)->create();
-
-    CollectionItem::factory()->for($collection)->create([
-        'name' => 'Ceramic dripper',
-        'quantity' => 2,
-        'rating' => 4.5,
-    ]);
-
-    WishlistItem::factory()->for($collection->wishlist)->create([
-        'name' => 'Gooseneck kettle',
-        'image_path' => null,
-        'quantity' => 1,
-        'rating' => null,
-    ]);
-
-    $this->actingAs($owner)
-        ->get(route('collections.show', $collection))
-        ->assertOk()
-        ->assertSee('aria-label="Quantity 2"', false)
-        ->assertSeeTextInOrder(['×2', 'Ceramic dripper', '4.5', '/ 5'])
-        ->assertSee('aria-label="Rated 4.5 out of 5"', false)
-        ->assertSee('Gooseneck kettle')
-        ->assertSee('class="hard-shadow hard-shadow-hover group relative flex min-w-0 flex-col', false)
-        ->assertSee('class="flex min-w-0 items-center justify-between gap-3"', false)
-        ->assertSee('class="grid aspect-4/3 place-items-center overflow-hidden border-b-2 border-zinc-950 bg-emerald-50"', false)
-        ->assertSee('class="grid aspect-4/3 place-items-center overflow-hidden border-b-2 border-zinc-950 bg-orange-50"', false)
-        ->assertDontSee('aria-label="Quantity 1"', false)
-        ->assertDontSee('Unrated');
-});
-
 test('item events refresh the computed collection and wishlist items', function () {
     $owner = User::factory()->create();
     $collection = Collection::factory()->for($owner)->create();

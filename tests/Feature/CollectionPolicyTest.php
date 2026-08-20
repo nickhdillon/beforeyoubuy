@@ -193,12 +193,21 @@ test('only an owner sees collection item actions', function () {
         ->assertOk()
         ->assertSee('aria-label="Edit Coffee grinder"', false)
         ->assertSee('aria-label="Actions for Coffee grinder"', false)
+        ->assertDontSee('aria-label="View larger image of Coffee grinder"', false)
         ->assertSee('Move to wishlist');
+
+    $this->get(route('collections.public', ['user' => $owner, 'collection' => $collection]))
+        ->assertOk()
+        ->assertSee('aria-label="View larger image of Coffee grinder"', false)
+        ->assertDontSee('aria-label="Edit Coffee grinder"', false)
+        ->assertDontSee('aria-label="Actions for Coffee grinder"', false);
 
     auth()->logout();
 
     $this->get(route('collections.public', ['user' => $owner, 'collection' => $collection]))
         ->assertOk()
+        ->assertSee('aria-label="View larger image of Coffee grinder"', false)
+        ->assertSee('class="max-h-[80vh] w-auto max-w-full justify-self-center object-contain"', false)
         ->assertDontSee('aria-label="Edit Coffee grinder"', false)
         ->assertDontSee('aria-label="Actions for Coffee grinder"', false)
         ->assertDontSee('Move to wishlist');

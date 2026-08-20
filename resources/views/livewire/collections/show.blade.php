@@ -122,7 +122,7 @@
         </p>
     </header>
 
-    <livewire:collection-items.index :$collection />
+    <livewire:collection-items.index :$collection :public-view="request()->routeIs('collections.public')" />
 
     @can('update', $collection)
         <livewire:wishlist-items.index :$collection :wishlist="$collection->wishlist" />

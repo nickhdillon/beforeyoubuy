@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -22,6 +23,9 @@ use Livewire\Component;
 class Index extends Component
 {
     public Collection $collection;
+
+    #[Locked]
+    public bool $publicView = false;
 
     #[Url(as: 'items', except: '')]
     public string $search = '';
