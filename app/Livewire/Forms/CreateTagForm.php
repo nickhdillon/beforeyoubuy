@@ -21,6 +21,7 @@ class CreateTagForm extends Form
         ]);
 
         $tag = $user->tags()->create($validated);
+        assert($tag instanceof Tag);
 
         $this->reset();
 
