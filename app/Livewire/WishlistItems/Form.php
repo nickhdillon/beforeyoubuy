@@ -195,6 +195,7 @@ class Form extends Component
     {
         Gate::authorize('create', [WishlistItem::class, $this->wishlist]);
 
+        $shouldCreateAnother = $this->createAnother;
         $image = $this->image;
         assert($image instanceof TemporaryUploadedFile);
 
@@ -209,17 +210,17 @@ class Form extends Component
 
         $item->tags()->sync($validated['tagIds']);
 
-        $this->reset(['image', 'name', 'url', 'quantity', 'notes', 'rating', 'removeImage']);
+        $this->reset(['image', 'name', 'url', 'quantity', 'notes', 'rating', 'createAnother', 'removeImage', 'tagIds']);
         $this->resetValidation();
 
-        if ($this->createAnother) {
+        if ($shouldCreateAnother) {
             $this->hasCreatedItemsAwaitingRefresh = true;
             Flux::toast(variant: 'success', text: 'Item added. Add another when you’re ready.');
 
             return;
         }
 
-        $this->reset('tagIds', 'hasCreatedItemsAwaitingRefresh');
+        $this->reset('hasCreatedItemsAwaitingRefresh');
         $this->dispatch('wishlist-item-created');
 
         Flux::modal('wishlist-item-form')->close();
