@@ -57,7 +57,7 @@ test('a tag can be created and selected without resetting the collection item fo
     $user = User::factory()->create();
     $collection = Collection::factory()->for($user)->create();
 
-    Livewire::actingAs($user)
+    $component = Livewire::actingAs($user)
         ->test(CollectionItemForm::class, ['collection' => $collection])
         ->assertSee('Create tag')
         ->set('name', 'Travel kettle')
@@ -71,14 +71,15 @@ test('a tag can be created and selected without resetting the collection item fo
         ->assertSet('tagIds', [$user->tags()->sole()->id])
         ->assertSee('Travel gear');
 
-    expect($user->tags()->sole()->name)->toBe('Travel gear');
+    expect($user->tags()->sole()->name)->toBe('Travel gear')
+        ->and(substr_count($component->html(), 'Travel gear'))->toBe(2);
 });
 
 test('a tag can be created and selected without resetting the wishlist item form', function () {
     $user = User::factory()->create();
     $collection = Collection::factory()->for($user)->create();
 
-    Livewire::actingAs($user)
+    $component = Livewire::actingAs($user)
         ->test(WishlistItemForm::class, ['collection' => $collection])
         ->assertSee('Create tag')
         ->set('name', 'Camera')
@@ -91,6 +92,8 @@ test('a tag can be created and selected without resetting the wishlist item form
         ->assertSet('tagForm.name', '')
         ->assertSet('tagIds', [$user->tags()->sole()->id])
         ->assertSee('Photography');
+
+    expect(substr_count($component->html(), 'Photography'))->toBe(2);
 });
 
 test('inline tag names must be unique for the collection owner', function () {

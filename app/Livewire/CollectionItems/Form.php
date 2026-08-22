@@ -120,7 +120,7 @@ class Form extends Component
         $this->tagIds = array_values(array_unique([...$this->tagIds, $tag->id]));
         $this->collection->user->setRelation(
             'tags',
-            $this->collection->user->tags->push($tag)->sortBy('name')->values(),
+            $this->collection->user->tags->push($tag)->unique('id')->sortBy('name')->values(),
         );
         unset($this->availableTags);
 
