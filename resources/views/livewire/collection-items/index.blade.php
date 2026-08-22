@@ -233,16 +233,72 @@
             @if ($publicView)
                 @foreach ($this->items as $item)
                     <flux:modal :name="'collection-item-image-'.$item->id" class="max-w-5xl">
-                        <div class="grid gap-4">
-                            @if ($item->name)
-                                <flux:heading size="lg" class="font-black!">{{ $item->name }}</flux:heading>
-                            @endif
+                        <div class="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(16rem,1fr)] lg:items-start">
+                            <div class="flex min-h-0 items-center justify-center overflow-hidden border-2 border-zinc-950 bg-emerald-50">
+                                <img
+                                    src="{{ Storage::disk('public')->url($item->image_path) }}"
+                                    alt="{{ $item->name ?: 'Collection item' }}"
+                                    class="max-h-[70vh] w-auto max-w-full object-contain"
+                                />
+                            </div>
 
-                            <img
-                                src="{{ Storage::disk('public')->url($item->image_path) }}"
-                                alt="{{ $item->name ?: 'Collection item' }}"
-                                class="max-h-[80vh] w-auto max-w-full justify-self-center object-contain"
-                            />
+                            <div class="min-w-0 space-y-5 lg:max-h-[70vh] lg:overflow-y-auto lg:pe-2">
+                                <div>
+                                    <flux:text class="text-xs! font-black! tracking-widest! text-emerald-700! uppercase!">Collection item</flux:text>
+                                    <flux:heading size="xl" class="mt-1! font-black! tracking-tight!">
+                                        {{ $item->name ?: 'Untitled item' }}
+                                    </flux:heading>
+                                </div>
+
+                                <dl class="grid grid-cols-2 gap-x-5 gap-y-4 border-y-2 border-zinc-950 py-4">
+                                    <div>
+                                        <dt class="text-xs font-black tracking-wider text-zinc-500 uppercase">Quantity</dt>
+                                        <dd class="mt-1 text-base font-black text-zinc-950">{{ Number::format($item->quantity) }}</dd>
+                                    </div>
+
+                                    @if ($item->rating)
+                                        <div>
+                                            <dt class="text-xs font-black tracking-wider text-zinc-500 uppercase">Rating</dt>
+                                            <dd class="mt-1 flex items-center gap-1.5 text-base font-black text-zinc-950" aria-label="Rated {{ $item->rating }} out of 5">
+                                                <span class="text-orange-600" aria-hidden="true">★</span>
+                                                <span>{{ (float) $item->rating === (float) (int) $item->rating ? Number::format($item->rating) : Number::format($item->rating, 1) }} / 5</span>
+                                            </dd>
+                                        </div>
+                                    @endif
+                                </dl>
+
+                                @if ($item->tags->isNotEmpty())
+                                    <div>
+                                        <h4 class="text-xs font-black tracking-wider text-zinc-500 uppercase">Tags</h4>
+                                        <div class="mt-2 flex flex-wrap gap-2">
+                                            @foreach ($item->tags as $tag)
+                                                <span wire:key="collection-item-modal-{{ $item->id }}-tag-{{ $tag->id }}" class="border border-emerald-700 bg-emerald-50 px-2.5 py-1 text-xs font-black text-emerald-800">{{ $tag->name }}</span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if ($item->notes)
+                                    <div>
+                                        <h4 class="text-xs font-black tracking-wider text-zinc-500 uppercase">Notes</h4>
+                                        <p class="mt-2 whitespace-pre-line break-words text-sm leading-relaxed font-medium text-zinc-700">{{ $item->notes }}</p>
+                                    </div>
+                                @endif
+
+                                @if ($item->url)
+                                    <div>
+                                        <h4 class="text-xs font-black tracking-wider text-zinc-500 uppercase">Link</h4>
+                                        <a
+                                            href="{{ $item->url }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="mt-2 block break-all text-sm font-black text-emerald-700 underline decoration-2 underline-offset-4 hover:text-emerald-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+                                        >
+                                            {{ $item->url }} ↗
+                                        </a>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
                     </flux:modal>
                 @endforeach

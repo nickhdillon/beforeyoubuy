@@ -2,6 +2,7 @@
 
 use App\Models\Collection;
 use App\Models\CollectionItem;
+use App\Models\Tag;
 use App\Models\User;
 use App\Policies\CollectionPolicy;
 use App\Policies\WishlistPolicy;
@@ -207,8 +208,39 @@ test('only an owner sees collection item actions', function () {
     $this->get(route('collections.public', ['user' => $owner, 'collection' => $collection]))
         ->assertOk()
         ->assertSee('aria-label="View larger image of Coffee grinder"', false)
-        ->assertSee('class="max-h-[80vh] w-auto max-w-full justify-self-center object-contain"', false)
+        ->assertSee('class="max-h-[70vh] w-auto max-w-full object-contain"', false)
         ->assertDontSee('aria-label="Edit Coffee grinder"', false)
         ->assertDontSee('aria-label="Actions for Coffee grinder"', false)
         ->assertDontSee('Move to wishlist');
+});
+
+test('a public collection item modal shows all available item details', function () {
+    $owner = User::factory()->create();
+    $collection = Collection::factory()->for($owner)->public()->create();
+    $tag = Tag::factory()->for($owner)->create(['name' => 'Coffee gear']);
+    $item = CollectionItem::factory()->for($collection)->create([
+        'name' => 'Hand grinder',
+        'url' => 'https://example.com/hand-grinder',
+        'quantity' => 2,
+        'notes' => 'Compact enough for travel and easy to clean.',
+        'rating' => 4.5,
+    ]);
+    $item->tags()->attach($tag);
+
+    $this->get(route('collections.public', ['user' => $owner, 'collection' => $collection]))
+        ->assertOk()
+        ->assertSeeInOrder([
+            'Collection item',
+            'Hand grinder',
+            'Quantity',
+            '2',
+            'Rating',
+            '4.5 / 5',
+            'Tags',
+            'Coffee gear',
+            'Notes',
+            'Compact enough for travel and easy to clean.',
+            'Link',
+            'https://example.com/hand-grinder',
+        ]);
 });
