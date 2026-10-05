@@ -27,7 +27,7 @@
                                 Choose a replacement photo
                             </div>
                         @else
-                            <img src="{{ Storage::disk('public')->url($item->image_path) }}" alt="Item photo preview" class="aspect-square w-full object-cover" />
+                            <img src="{{ Storage::disk('s3')->url($item->image_path) }}" alt="Item photo preview" class="aspect-square w-full object-cover" />
                         @endif
                     </div>
 

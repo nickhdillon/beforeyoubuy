@@ -142,7 +142,7 @@ class Form extends Component
         $item->delete();
 
         if ($imagePath !== null) {
-            Storage::disk('public')->delete($imagePath);
+            Storage::disk('s3')->delete($imagePath);
         }
 
         Flux::modal('delete-wishlist-item')->close();
@@ -200,7 +200,7 @@ class Form extends Component
         assert($image instanceof TemporaryUploadedFile);
 
         $item = $this->wishlist->items()->create([
-            'image_path' => $image->store('wishlist-items', 'public'),
+            'image_path' => $image->store('wishlist-items', 's3'),
             'name' => filled($validated['name']) ? $validated['name'] : null,
             'url' => filled($validated['url']) ? $validated['url'] : null,
             'notes' => filled($validated['notes']) ? $validated['notes'] : null,
@@ -238,7 +238,7 @@ class Form extends Component
         Gate::authorize('update', $item);
 
         $oldImagePath = $item->image_path;
-        $newImagePath = $this->image?->store('wishlist-items', 'public');
+        $newImagePath = $this->image?->store('wishlist-items', 's3');
 
         $item->update([
             'image_path' => $newImagePath ?? $oldImagePath,
@@ -252,7 +252,7 @@ class Form extends Component
         $item->tags()->sync($validated['tagIds']);
 
         if ($newImagePath !== null && $oldImagePath !== null) {
-            Storage::disk('public')->delete($oldImagePath);
+            Storage::disk('s3')->delete($oldImagePath);
         }
 
         $this->dispatch('wishlist-item-updated');

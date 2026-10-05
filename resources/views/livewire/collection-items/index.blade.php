@@ -171,7 +171,7 @@
 
                         <div class="hard-shadow m-3 mb-0 overflow-hidden border-2 border-zinc-950 bg-emerald-50">
                             <img
-                                src="{{ Storage::disk('public')->url($item->image_path) }}"
+                                src="{{ Storage::disk('s3')->url($item->image_path) }}"
                                 alt="{{ $item->name ?: 'Collection item' }}"
                                 class="aspect-square w-full object-cover transition duration-300 group-hover:saturate-110"
                             />
@@ -236,7 +236,7 @@
                         <div class="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(16rem,1fr)] lg:items-start">
                             <div class="flex min-h-0 items-center justify-center overflow-hidden border-2 border-zinc-950 bg-emerald-50">
                                 <img
-                                    src="{{ Storage::disk('public')->url($item->image_path) }}"
+                                    src="{{ Storage::disk('s3')->url($item->image_path) }}"
                                     alt="{{ $item->name ?: 'Collection item' }}"
                                     class="max-h-[70vh] w-auto max-w-full object-contain"
                                 />

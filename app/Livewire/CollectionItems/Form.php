@@ -167,7 +167,7 @@ class Form extends Component
         $imagePath = $item->image_path;
 
         $item->delete();
-        Storage::disk('public')->delete($imagePath);
+        Storage::disk('s3')->delete($imagePath);
 
         Flux::modal('delete-collection-item')->close();
         Flux::modal('collection-item-form')->close();
@@ -193,7 +193,7 @@ class Form extends Component
         assert($image instanceof TemporaryUploadedFile);
 
         $item = $this->collection->items()->create([
-            'image_path' => $image->store('collection-items', 'public'),
+            'image_path' => $image->storePublicly('collection-items', 's3'),
             'name' => filled($validated['name']) ? $validated['name'] : null,
             'url' => filled($validated['url']) ? $validated['url'] : null,
             'quantity' => $validated['quantity'],
@@ -231,7 +231,7 @@ class Form extends Component
         Gate::authorize('update', $item);
 
         $oldImagePath = $item->image_path;
-        $newImagePath = $this->image?->store('collection-items', 'public');
+        $newImagePath = $this->image?->storePublicly('collection-items', 's3');
 
         $item->update([
             'image_path' => $newImagePath ?? $oldImagePath,
@@ -245,7 +245,7 @@ class Form extends Component
         $item->tags()->sync($validated['tagIds']);
 
         if ($newImagePath !== null) {
-            Storage::disk('public')->delete($oldImagePath);
+            Storage::disk('s3')->delete($oldImagePath);
         }
 
         $this->dispatch('collection-item-updated');

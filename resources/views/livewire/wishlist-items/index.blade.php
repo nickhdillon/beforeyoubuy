@@ -177,7 +177,7 @@
                         <div class="grid aspect-4/3 place-items-center overflow-hidden border-b-2 border-zinc-950 bg-orange-50">
                             @if ($item->image_path)
                                 <img
-                                    src="{{ Storage::disk('public')->url($item->image_path) }}"
+                                    src="{{ Storage::disk('s3')->url($item->image_path) }}"
                                     alt="{{ $item->name ?: 'Wishlist item' }}"
                                     class="block size-full object-cover object-center transition duration-300 group-hover:scale-[1.02] group-hover:saturate-110"
                                 />
