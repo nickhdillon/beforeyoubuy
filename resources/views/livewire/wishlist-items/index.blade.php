@@ -180,6 +180,7 @@
                                     src="{{ Storage::disk('s3')->url($item->image_path) }}"
                                     alt="{{ $item->name ?: 'Wishlist item' }}"
                                     class="block size-full object-cover object-center transition duration-300 group-hover:scale-[1.02] group-hover:saturate-110"
+                                    loading="lazy"
                                 />
                             @else
                                 <div class="grid place-items-center text-orange-300" aria-hidden="true">

@@ -174,6 +174,7 @@
                                 src="{{ Storage::disk('s3')->url($item->image_path) }}"
                                 alt="{{ $item->name ?: 'Collection item' }}"
                                 class="aspect-square w-full object-cover transition duration-300 group-hover:saturate-110"
+                                loading="lazy"
                             />
                         </div>
 
@@ -239,6 +240,7 @@
                                     src="{{ Storage::disk('s3')->url($item->image_path) }}"
                                     alt="{{ $item->name ?: 'Collection item' }}"
                                     class="max-h-[70vh] w-auto max-w-full object-contain"
+                                    loading="lazy"
                                 />
                             </div>
 
